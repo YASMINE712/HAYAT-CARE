@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}🧠 Memory Assessment & Brain Training | HayatCare{% endblock %}
+{% block content %}
+<div class="flex items-center justify-center p-4 md:p-8 min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+  <div class="card bg-white rounded-xl p-8 max-w-2xl w-full relative overflow-hidden">
+    <!-- Platform Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center">
+        <i class="fas fa-heartbeat text-3xl text-indigo-600 mr-3"></i>
+        <span class="text-xl font-semibold text-gray-800">HayatCare</span>
+      </div>
+      <div class="text-sm text-gray-500">
+        <i class="fas fa-user-circle mr-1"></i> Welcome, User
+      </div>
+    </div>
+    
+    <!-- Progress indicator -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium text-indigo-600">Memory Assessment & Brain Training</span>
+        <span class="text-xs text-gray-500">Step 1 of 5</span>
+      </div>
+      <div class="progress-bar w-full">
+        <div class="progress-fill" style="width: 20%"></div>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="text-center">
+      <div class="bg-indigo-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-brain text-3xl text-indigo-600"></i>
+      </div>
+      
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Memory Assessment & Brain Training Games</h1>
+      <p class="text-indigo-600 font-medium mb-4">Keep Your Mind Sharp with Fun, Interactive Challenges!</p>
+      
+      <p class="text-gray-600 mb-6 leading-relaxed">
+        Enjoy engaging brain games designed to help you maintain cognitive sharpness while providing insights 
+        into your memory and thinking skills. Most importantly, it's fun and keeps your memory sharp!
+      </p>
+      
+      <div class="bg-green-50 rounded-lg p-4 mb-6 text-left">
+        <div class="flex items-start">
+          <i class="fas fa-gamepad text-green-500 mt-1 mr-3"></i>
+          <div>
+            <p class="text-sm text-green-800">
+              <strong>What to Expect:</strong> Interactive puzzles, memory challenges, and brain training exercises 
+              that make cognitive wellness enjoyable and engaging!
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-blue-50 rounded-lg p-4 mb-6 text-left">
+        <div class="flex items-start">
+          <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+          <div>
+            <p class="text-sm text-blue-800">
+              <strong>Important Note:</strong> While this tool provides valuable cognitive insights, it's designed 
+              for wellness and brain training purposes. Any concerns about memory should be discussed with a healthcare professional.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-left">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-clock text-indigo-500 mr-2"></i>
+            <span class="font-medium text-gray-700">Duration</span>
+          </div>
+          <p class="text-sm text-gray-600">10-15 minutes of fun activities</p>
+        </div>
+        
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-puzzle-piece text-indigo-500 mr-2"></i>
+            <span class="font-medium text-gray-700">Games Included</span>
+          </div>
+          <p class="text-sm text-gray-600">Memory games, puzzles & brain challenges</p>
+        </div>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <button onclick="window.location.href='/start-assessment'"
+                class="button-primary text-white font-medium py-3 px-8 rounded-lg shadow-sm">
+          <i class="fas fa-play mr-2"></i> Start Playing!
+        </button>
+        
+        <button onclick="showMoreInfo()" 
+                class="border border-gray-300 text-gray-700 font-medium py-3 px-8 rounded-lg hover:bg-gray-50 transition">
+          <i class="fas fa-question-circle mr-2"></i> Learn More
+        </button>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="mt-8 pt-6 border-t border-gray-100 text-center text-xs text-gray-500">
+      <p>HayatCare Platform © 2023 | <a href="#" class="text-indigo-600 hover:underline">Privacy Policy</a></p>
+    </div>
+    
+    <!-- Info Modal (hidden by default) -->
+    <div id="infoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+      <div class="bg-white rounded-xl max-w-md w-full p-6 relative">
+        <button onclick="hideMoreInfo()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+        
+        <h3 class="text-xl font-bold text-gray-800 mb-4">
+          <i class="fas fa-gamepad text-indigo-500 mr-2"></i> About Memory Assessment & Brain Training
+        </h3>
+        
+        <div class="space-y-4 text-gray-600 text-sm">
+          <p>
+            Our brain training games are designed to be both fun and beneficial for cognitive wellness. 
+            They help you stay mentally active while providing insights into your cognitive patterns.
+          </p>
+          
+          <p>
+            <strong>What the games include:</strong>
+            <ul class="list-disc pl-5 mt-2 space-y-1">
+              <li>Interactive memory challenges</li>
+              <li>Pattern recognition puzzles</li>
+              <li>Attention and focus exercises</li>
+              <li>Problem-solving games</li>
+              <li>Fun brain teasers</li>
+            </ul>
+          </p>
+          
+          <p>
+            <strong>Benefits:</strong> Regular practice with these games can help maintain cognitive sharpness, 
+            provide mental stimulation, and give you insights into your memory patterns.
+          </p>
+          
+          <p>
+            <strong>Remember:</strong> This is designed for wellness and brain training. 
+            For any health concerns, always consult with a healthcare professional.
+          </p>
+        </div>
+        
+        <button onclick="hideMoreInfo()" 
+                class="mt-6 w-full bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
+          Ready to Play!
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .card {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  .progress-bar {
+    height: 6px;
+    background-color: #e0e7ff;
+    border-radius: 3px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+    width: 20%;
+    transition: width 0.5s ease;
+  }
+  .button-primary {
+    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+    transition: all 0.3s ease;
+  }
+  .button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+  }
+  .button-primary:active {
+    transform: translateY(0);
+  }
+</style>
+<script>
+  function showMoreInfo() {
+    document.getElementById('infoModal').classList.remove('hidden');
+  }
+  function hideMoreInfo() {
+    document.getElementById('infoModal').classList.add('hidden');
+  }
+</script>
+{% endblock %}

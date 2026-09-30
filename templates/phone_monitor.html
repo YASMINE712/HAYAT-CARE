@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Phone fall monitoring — HayatCare{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+  <h1 class="text-3xl font-bold">Phone fall monitoring</h1>
+  <p>Open this page on the older adult's phone and carry it securely on the body. Keep this page visible and the phone unlocked.</p>
+  <div class="p-4 rounded bg-amber-50 text-amber-900">Experimental detection: a dropped phone can look like a fall, and some falls may be missed. This does not replace an emergency alarm or caregiver checks.</div>
+  <label class="block p-4 border rounded"><input id="notify-caregiver" type="checkbox"> Notify my saved caregiver by WhatsApp after a 20-second countdown if I do not cancel.</label>
+  <p id="provider-status" class="text-sm"></p>
+  <div class="flex gap-4"><button id="start-monitor" class="bg-blue-700 text-white rounded px-6 py-3">Start monitoring</button><button id="stop-monitor" disabled class="border rounded px-6 py-3">Stop</button></div>
+  <div class="p-5 border rounded" role="status" aria-live="polite"><strong id="motion-status">Monitoring is off.</strong><p id="motion-reading"></p><p id="motion-error" class="text-red-700"></p></div>
+  <div id="fall-prompt" hidden class="fixed inset-0 z-50 bg-white p-6 overflow-auto border-4 border-red-600" role="alertdialog" aria-modal="true" aria-labelledby="fall-prompt-title">
+    <h2 id="fall-prompt-title" class="text-3xl font-bold mt-6 mb-6">Possible fall detected. Are you okay?</h2>
+    <p id="countdown"></p>
+    <p id="fall-error" role="status" class="text-red-700 mt-3"></p>
+    <div class="flex flex-col gap-4 mt-6"><button id="cancel-fall" class="bg-green-700 text-white text-xl rounded px-6 py-5">I'm okay — cancel</button><button id="help-now" class="bg-red-700 text-white text-xl rounded px-6 py-5">Send caregiver alert now</button></div>
+  </div>
+  <p>When you stop, leave this page, lose connectivity, or lock the phone, live monitoring may stop. An alert countdown that has already started continues unless you cancel it.</p>
+  <a href="{{ url_for('fall_history') }}" class="text-blue-700 underline">View recorded events and message status</a>
+</div>
+<script src="{{ url_for('static', filename='phone-monitor.js') }}" defer></script>
+{% endblock %}

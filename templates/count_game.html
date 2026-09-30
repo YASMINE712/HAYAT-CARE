@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% include 'security.html' %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔢 Count Challenge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    .pulse { animation: pulse 1.5s infinite; }
+    .star { transition: all 0.3s ease; }
+    .btn-option { transition: all 0.2s ease; }
+    .btn-option:hover { transform: translateY(-2px); }
+    .btn-option:active { transform: translateY(0); }
+    .correct {
+      background-color: #d1fae5 !important;
+      border-color: #10b981 !important;
+      color: #065f46 !important;
+    }
+    .wrong {
+      background-color: #fee2e2 !important;
+      border-color: #ef4444 !important;
+      color: #b91c1c !important;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+  <div class="max-w-md w-full bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-indigo-600 text-white p-6 text-center">
+      <h1 class="text-2xl font-bold flex items-center justify-center gap-2">
+        <i class="fas fa-star"></i>
+        <span>Count Challenge</span>
+      </h1>
+      <p class="text-indigo-100 mt-2">Count the stars quickly and accurately</p>
+    </div>
+
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">
+          <span class="font-medium">Score:</span> <span id="score">0</span>
+        </div>
+        <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">
+          <span class="font-medium">Round:</span> <span id="round">0</span>/10
+        </div>
+      </div>
+
+      <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+        <div id="progress" class="bg-indigo-500 h-2 rounded-full" style="width: 0%"></div>
+      </div>
+
+      <div id="instruction" class="text-center text-gray-600 mb-4">Get ready!</div>
+
+      <div id="game-area" class="relative flex justify-center mb-8 min-h-24">
+        <div id="stars" class="flex flex-wrap justify-center gap-4 max-w-xs"></div>
+      </div>
+
+      <div id="options" class="grid grid-cols-2 gap-3 mb-6"></div>
+
+      <div id="results" class="hidden bg-indigo-50 p-4 rounded-lg mb-6 text-center">
+        <h3 class="text-xl font-bold text-indigo-800 mb-2">Game Complete!</h3>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="bg-white p-3 rounded-lg">
+            <div class="text-sm text-gray-500">Correct</div>
+            <div id="correct" class="text-2xl font-bold">0/10</div>
+          </div>
+          <div class="bg-white p-3 rounded-lg">
+            <div class="text-sm text-gray-500">Attempts</div>
+            <div id="attempts" class="text-2xl font-bold">0</div>
+          </div>
+          <div class="bg-white p-3 rounded-lg">
+            <div class="text-sm text-gray-500">Time</div>
+            <div id="time" class="text-2xl font-bold">0s</div>
+          </div>
+          <div class="bg-white p-3 rounded-lg">
+            <div class="text-sm text-gray-500">Score</div>
+            <div id="final" class="text-2xl font-bold text-indigo-600">0%</div>
+          </div>
+        </div>
+
+        <button id="restart" class="mt-4 inline-block bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-indigo-700 transition">
+          Play Again <i class="fas fa-redo ml-2"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Game configuration
+    const config = {
+      rounds: 10,
+      minStars: 3,
+      maxStars: 12,
+      options: 4
+    };
+
+    // Game state
+    let state = {
+      currentRound: 0,
+      score: 0,
+      attempts: 0,
+      startTime: null,
+      correctAnswer: 0,
+      isPlaying: false
+    };
+
+    // DOM elements
+    const elements = {
+      stars: document.getElementById('stars'),
+      options: document.getElementById('options'),
+      instruction: document.getElementById('instruction'),
+      score: document.getElementById('score'),
+      round: document.getElementById('round'),
+      progress: document.getElementById('progress'),
+      results: document.getElementById('results'),
+      correct: document.getElementById('correct'),
+      attempts: document.getElementById('attempts'),
+      time: document.getElementById('time'),
+      final: document.getElementById('final'),
+      restart: document.getElementById('restart')
+    };
+
+    // Initialize the game
+    function initGame() {
+      state.currentRound = 0;
+      state.score = 0;
+      state.attempts = 0;
+      state.startTime = Date.now();
+      state.isPlaying = true;
+
+      elements.score.textContent = '0';
+      elements.round.textContent = '0/10';
+      elements.progress.style.width = '0%';
+      elements.results.classList.add('hidden');
+
+      startRound();
+    }
+
+    // Start a new round
+    function startRound() {
+      state.currentRound++;
+      state.isPlaying = true;
+
+      // Update UI
+      elements.round.textContent = `${state.currentRound}/${config.rounds}`;
+      elements.progress.style.width = `${(state.currentRound / config.rounds) * 100}%`;
+      elements.instruction.textContent = `Round ${state.currentRound} of ${config.rounds}`;
+
+      // Clear previous round
+      elements.stars.innerHTML = '';
+      elements.options.innerHTML = '';
+
+      // Generate random number of stars (3-12)
+      state.correctAnswer = Math.floor(Math.random() * (config.maxStars - config.minStars + 1)) + config.minStars;
+
+      // Create stars
+      for (let i = 0; i < state.correctAnswer; i++) {
+        const star = document.createElement('div');
+        star.className = 'star text-yellow-400 text-3xl fade-in';
+        star.innerHTML = '★';
+        star.style.animationDelay = `${i * 0.1}s`;
+        elements.stars.appendChild(star);
+      }
+
+      // Generate answer options
+      const options = generateOptions(state.correctAnswer);
+      options.forEach((option, index) => {
+        const button = document.createElement('button');
+        button.className = 'btn-option py-3 px-4 bg-gray-100 border border-gray-200 rounded-lg font-medium text-gray-800';
+        button.textContent = option;
+        button.addEventListener('click', () => checkAnswer(option, button));
+        elements.options.appendChild(button);
+      });
+    }
+
+    // Generate answer options with one correct answer
+    function generateOptions(correct) {
+      const options = new Set([correct]);
+      
+      while (options.size < config.options) {
+        const offset = Math.floor(Math.random() * 3) + 1;
+        const direction = Math.random() > 0.5 ? 1 : -1;
+        const newOption = correct + (offset * direction);
+        
+        if (newOption >= config.minStars && newOption <= config.maxStars) {
+          options.add(newOption);
+        }
+      }
+      
+      return Array.from(options).sort(() => Math.random() - 0.5);
+    }
+
+    // Check if selected answer is correct
+    function checkAnswer(selected, button) {
+      if (!state.isPlaying) return;
+      
+      state.isPlaying = false;
+      state.attempts++;
+      
+      const allButtons = elements.options.querySelectorAll('button');
+      allButtons.forEach(btn => btn.disabled = true);
+      
+      if (selected === state.correctAnswer) {
+        state.score++;
+        elements.score.textContent = state.score;
+        button.classList.add('correct');
+        createConfetti();
+      } else {
+        button.classList.add('wrong');
+        // Highlight correct answer
+        allButtons.forEach(btn => {
+          if (parseInt(btn.textContent) === state.correctAnswer) {
+            btn.classList.add('correct');
+          }
+        });
+      }
+      
+      // Move to next round or end game
+      setTimeout(() => {
+        if (state.currentRound < config.rounds) {
+          startRound();
+        } else {
+          endGame();
+        }
+      }, 1500);
+    }
+
+    // Create celebration confetti
+    function createConfetti() {
+      const colors = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'];
+      const container = document.getElementById('game-area');
+
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.top = '-10px';
+        container.appendChild(confetti);
+
+        setTimeout(() => {
+          confetti.style.opacity = '1';
+          confetti.style.transform = `translate(${(Math.random() - 0.5) * 200}px, ${Math.random() * 300 + 100}px) rotate(${Math.random() * 360}deg)`;
+          confetti.style.transition = `all ${Math.random() * 1 + 0.5}s ease-out`;
+
+          setTimeout(() => {
+            confetti.style.opacity = '0';
+            setTimeout(() => confetti.remove(), 1000);
+          }, 100);
+        }, 10);
+      }
+    }
+
+    // End the game and show results
+    async function endGame() {
+      const timeElapsed = Math.floor((Date.now() - state.startTime) / 1000);
+      const percentage = Math.round((state.score / config.rounds) * 100);
+
+      elements.correct.textContent = `${state.score}/${config.rounds}`;
+      elements.attempts.textContent = state.attempts;
+      elements.time.textContent = `${timeElapsed}s`;
+      elements.final.textContent = `${percentage}%`;
+      
+      elements.results.classList.remove('hidden');
+      try {
+        const response = await fetch('/games/count/submit', {method:'POST', body:new URLSearchParams({
+          score:state.score, attempts:state.attempts, duration:timeElapsed,
+          accuracy:state.score/Math.max(1,state.attempts)
+        })});
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Scores could not be saved.');
+        const next = document.createElement('a'); next.href=result.next_game;
+        next.textContent='Continue to sequence game'; next.className='block text-blue-700 underline mt-4';
+        elements.results.append(next);
+      } catch (error) { const notice=document.createElement('p'); notice.textContent=error.message; elements.results.append(notice); }
+
+    }
+
+    // Event listeners
+    elements.restart.addEventListener('click', initGame);
+    
+    // Start the game
+    initGame();
+  </script>
+</body>
+</html>

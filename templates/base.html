@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% include 'security.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HayatCare{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+         body, html {
+        background: #fff !important;
+    }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Dark mode scrollbar */
+        .dark ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        :root {
+            --primary-blue: #1e88e5;
+            --primary-dark: #0d47a1;
+            --primary-light: #64b5f6;
+            --accent-blue: #2979ff;
+            --text-dark: #263238;
+            --text-light: #ffffff;
+            --bg-white: #ffffff;
+            --bg-light: #f5f9ff;
+            --bg-card: #ffffff;
+            --shadow: 0 4px 6px rgba(30, 136, 229, 0.1);
+            --border-color: #e3f2fd;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--primary-blue);
+            padding: 30px;
+            color: var(--text-light);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+        }
+
+        header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header h2 i {
+            margin-right: 10px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-footer {
+            padding: 15px 20px;
+            background-color: var(--bg-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            background-color: #e0e0e0;
+            color: #757575;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+        }
+
+        /* Section Headers */
+        h2 {
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        h2 i {
+            margin-right: 10px;
+            color: var(--primary-blue);
+        }
+
+        /* Button Styles */
+        button {
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Patient Card Styles */
+        .patient-avatar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            background-color: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--text-light);
+            margin-right: 20px;
+        }
+
+        .avatar-circle.low-risk {
+            background-color: var(--primary-light);
+        }
+
+        .avatar-circle.medium-risk {
+            background-color: var(--warning-color);
+        }
+
+        .avatar-circle.high-risk {
+            background-color: var(--danger-color);
+        }
+
+        .patient-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat-item {
+            flex: 1;
+            min-width: 100px;
+            background-color: var(--bg-light);
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #78909c;
+            display: block;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .patient-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .detail-item i {
+            color: var(--primary-blue);
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        /* House Card Styles */
+        .house-visualization {
+            min-height: 200px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #b0bec5;
+            height: 100%;
+            min-height: 150px;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .house-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .room-card {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .room-header {
+            background-color: var(--primary-light);
+            color: var(--text-dark);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .room-header i {
+            margin-right: 8px;
+        }
+
+        .room-header h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .room-objects {
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .object-tag {
+            background-color: var(--bg-light);
+            color: var(--primary-dark);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Vitals Section */
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .vital-card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .vital-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            color: var(--text-light);
+        }
+
+        .heart-rate {
+            background-color: var(--primary-blue);
+        }
+
+        .blood-pressure {
+            background-color: var(--primary-dark);
+        }
+
+        .temperature {
+            background-color: var(--primary-light);
+        }
+
+        .oxygen {
+            background-color: var(--accent-blue);
+        }
+
+        .vital-info {
+            flex: 1;
+        }
+
+        .vital-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #78909c;
+        }
+
+        .vital-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .vital-unit {
+            font-size: 0.9rem;
+            color: #78909c;
+        }
+
+        /* Risk Assessment Section */
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .risk-card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid #e0e0e0;
+        }
+
+        .risk-card.low-risk {
+            border-left-color: var(--primary-light);
+        }
+
+        .risk-card.medium-risk {
+            border-left-color: var(--warning-color);
+        }
+
+        .risk-card.high-risk {
+            border-left-color: var(--danger-color);
+        }
+
+        .risk-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .risk-header i {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            color: var(--primary-blue);
+        }
+
+        .risk-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+        }
+
+        .risk-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        .risk-explanation {
+            font-size: 0.9rem;
+            color: #546e7a;
+        }
+
+        /* Risk Assessment Card Styles */
+        .risk-assessment-card .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .risk-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .risk-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .risk-content h4 {
+            margin: 0 0 5px 0;
+            color: var(--primary-dark);
+        }
+
+        .risk-content p {
+            margin: 0;
+            color: #546e7a;
+            font-size: 0.9rem;
+        }
+
+        /* Annotated Image Styles */
+        .annotated-image-container {
+            position: relative;
+            min-height: 300px;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .annotated-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .annotation {
+            position: absolute;
+            border: 2px solid var(--primary-blue);
+            background-color: rgba(30, 136, 229, 0.1);
+            border-radius: 4px;
+        }
+
+        .annotation-label {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        /* Scenario Section */
+        .scenario-controls {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            color: var(--primary-dark);
+        }
+
+        .input-group label i {
+            margin-right: 8px;
+            color: var(--primary-blue);
+        }
+
+        .input-group input, .input-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-white);
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .recommendations-card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .recommendations-card h3 {
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+            padding: 15px 20px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .recommendations-card h3 i {
+            margin-right: 10px;
+        }
+
+        .recommendations-content {
+            padding: 20px;
+            min-height: 150px;
+        }
+
+        .recommendation-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-item i {
+            color: var(--primary-blue);
+            margin-right: 10px;
+            font-size: 1.2rem;
+            margin-top: 3px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--bg-white);
+            margin: 50px auto;
+            max-width: 600px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .modal-content h2 {
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+            padding: 15px 20px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-content h2 i {
+            margin-right: 10px;
+            color: var(--text-light);
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        form {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: var(--primary-blue);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .preview-container {
+            margin-top: 15px;
+            border: 1px dashed var(--border-color);
+            border-radius: 4px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .empty-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #b0bec5;
+        }
+
+        .empty-preview i {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--bg-white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+
+        .notification.success i {
+            color: var(--success-color);
+        }
+
+        .notification.error i {
+            color: var(--danger-color);
+        }
+
+        .notification.fade-out {
+            opacity: 0;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+
+        .room-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .room-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .room-card.selected {
+            border: 2px solid #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #E5E7EB;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #3B82F6;
+            transition: width 0.5s ease;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Container */
+        .form-container {
+            background: linear-gradient(to bottom right, #ebf8ff, #d1fae5);
+        }
+
+        .risk-high { background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); }
+        .risk-medium { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); }
+        .risk-low { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+        .progress-bar { height: 10px; border-radius: 5px; background-color: #e2e8f0; }
+        .progress-fill { height: 100%; border-radius: 5px; transition: width 1s ease; }
+
+        /* Signup Form Styles */
+        .signup-card {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(30, 40, 60, 0.18);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 900px;
+            margin: 40px auto;
+            min-height: 540px;
+        }
+
+        @media (max-width: 900px) {
+            .signup-card { grid-template-columns: 1fr; }
+            .banner-img { display: none; }
+        }
+
+        .form-side {
+            padding: 48px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #fff;
+        }
+
+        .banner-img {
+            background: #232733;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 540px;
+        }
+
+        .banner-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #232733;
+        }
+
+        .form-title {
+            color: #1e88e5;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
+            color: #4b5563;
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            color: #263238;
+            font-weight: 500;
+        }
+
+        .form-input, .form-select {
+            margin-top: 0.25rem;
+            margin-bottom: 1rem;
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e3f2fd;
+            border-radius: 6px;
+            background: #f5f9ff;
+            font-size: 1rem;
+            transition: border 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: #1e88e5;
+            outline: none;
+            background: #fff;
+        }
+
+        .form-checkbox {
+            accent-color: #1e88e5;
+            margin-right: 8px;
+        }
+
+        .form-btn {
+            background: #1e88e5;
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            margin-top: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .form-btn:hover {
+            background: #1565c0;
+        }
+
+        .form-link {
+            color: #1e88e5;
+            text-decoration: underline;
+            margin-left: 4px;
+        }
+
+        .error-message {
+            background: #ffeaea;
+            color: #d32f2f;
+            border: 1px solid #ffcdd2;
+            border-radius: 5px;
+            padding: 10px 14px;
+            margin-bottom: 1rem;
+            font-size: 0.98rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .vitals-grid, .risk-grid {
+                grid-template-columns: 1fr;
+            }
+            .scenario-controls {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        {% block page_css %}{% endblock %}
+    </style>
+    {% block extra_css %}{% endblock %}
+<link rel="stylesheet" href="{{ url_for('static',filename='hayat-ui.css') }}">
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen">
+    <!-- Navigation/Header -->
+<header class="hc-header"><a class="hc-brand" href="{{ url_for('menu') if session.get('username') else url_for('index') }}"><span>♡</span>HayatCare</a><nav class="hc-nav" aria-label="Main navigation">{% if session.get('username') %}<a href="/menu">My day</a><a href="/brain-training">Activities</a><a href="/medications">Medications</a><a href="/profile">My profile</a><form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Sign out</button></form>{% else %}<a href="/">Home</a><a href="/login">Sign in</a><a href="/signup">Get started</a>{% endif %}</nav></header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {% with messages = get_flashed_messages() %}{% for message in messages %}<p role="alert" class="p-4 bg-amber-50">{{ message }}</p>{% endfor %}{% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+<footer class="hc-footer"><span>♡ HayatCare · A little support, every day.</span><span>Your routine. Your pace.</span></footer>
+
+    <!-- Dark Mode Script -->
+    <script>
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Toggle dark mode
+        document.getElementById('darkModeToggle')?.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+    {% if session.get('username') %}<script src="{{ url_for('static',filename='care-notifications.js') }}"></script>{% endif %}
+</body>
+</html>

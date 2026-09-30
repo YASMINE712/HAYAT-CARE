@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Reminders — HayatCare{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6"><h1 class="text-3xl font-bold">Reminders</h1>
+<p>Your reminders are saved to your account. Keep HayatCare running so reminders can arrive on time, even when you close this page. When WhatsApp is connected, you can also send reminders to your caregiver.</p>
+<form id="reminder-form" class="p-5 border rounded space-y-4">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input id="reminder-id" type="hidden">
+<label class="block">Title <input id="reminder-title" class="border rounded p-2 w-full" maxlength="150" required></label>
+<label class="block">Date and time (your local time) <input id="reminder-due" type="datetime-local" class="border rounded p-2 w-full" required></label>
+<label class="block">Description <textarea id="reminder-description" class="border rounded p-2 w-full" maxlength="1000"></textarea></label>
+<label class="block">Repeat <select id="reminder-repeat" class="border rounded p-2"><option value="none">Once</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+<label class="block"><input id="reminder-notify" type="checkbox"> Send this reminder to my saved caregiver by WhatsApp.</label>
+<button class="bg-blue-700 text-white rounded px-5 py-3">Save reminder</button><button id="reminder-reset" type="button" class="border rounded px-5 py-3">Clear</button>
+</form><p id="reminder-message" role="status"></p><div id="reminder-list" class="space-y-4"></div>
+<h2 class="text-xl font-bold">Recent reminders and message status</h2><div id="reminder-deliveries" class="space-y-3"></div></div>
+<script src="{{ url_for('static', filename='reminders.js') }}" defer></script>
+{% endblock %}

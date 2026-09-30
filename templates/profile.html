@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Patient profile — HayatCare{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+<h1 class="text-3xl font-bold">{{ patient_data.name }}'s profile</h1>
+<a class="inline-block text-blue-700 underline" href="{{ url_for('edit_profile') }}">Edit profile and caregiver number</a>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+<section class="border rounded p-5"><h2 class="text-xl font-semibold">Patient information</h2>
+<dl class="space-y-2 mt-3"><dt>Age</dt><dd>{{ patient_data.age }}</dd><dt>Conditions</dt><dd>{{ patient_data.diseases or 'Not provided' }}</dd>
+<dt>Medications</dt><dd>{{ patient_data.medications|join(', ') or 'Not provided' }}</dd>
+<dt>Caregiver phone</dt><dd>{{ patient_data.emergency_contact or 'Not provided' }}</dd>
+<dt>Mobility / vision</dt><dd>{{ patient_data.mobility or 'Unknown' }} / {{ patient_data.vision or 'Unknown' }}</dd>
+<dt>Fall history</dt><dd>{{ 'Yes' if patient_data.fall_history else 'No' }}</dd></dl></section>
+<section class="border rounded p-5"><h2 class="text-xl font-semibold">Phone monitoring</h2><p class="mt-3">{{ fall_label }}</p><p>{{ fall_expl }}</p>
+<a class="block mt-4 text-blue-700 underline" href="{{ url_for('phone.monitor') }}">Connect phone sensors</a>
+<a class="block mt-4 text-blue-700 underline" href="{{ url_for('fall_history') }}">View events and message status</a></section>
+<section class="border rounded p-5"><h2 class="text-xl font-semibold">Example health readings</h2><p class="p-3 my-3 bg-amber-50">These vital signs are simulated, not measured.</p>
+<p>Heart rate: {{ vitals.heart_rate }} bpm</p><p>Blood pressure: {{ vitals.systolic_bp }}/{{ vitals.diastolic_bp }} mmHg</p>
+<p>Temperature: {{ vitals.temperature }} °C</p><p>Oxygen: {{ vitals.oxygen }}%</p><p class="mt-3">{{ health_expl }}</p></section>
+<section class="border rounded p-5"><h2 class="text-xl font-semibold">Cardiovascular inputs</h2><p class="mt-3">{{ chd_expl }}</p>
+<a class="block mt-4 text-blue-700 underline" href="{{ url_for('heart_risk') }}">Enter measured inputs</a>
+<a class="block mt-4 text-blue-700 underline" href="{{ url_for('alzheimer') }}">Open cognitive games</a></section>
+</div>
+<section class="border rounded p-5"><h2 class="text-xl font-semibold">Caregiver contact</h2>
+{% if patient_data.emergency_contact %}
+<a class="inline-block my-4 mr-4 bg-blue-700 text-white rounded p-3" href="tel:{{ patient_data.emergency_contact }}">Open phone dialer</a>
+<button id="manual-alert" class="bg-red-700 text-white rounded p-3">Send caregiver a WhatsApp help request</button>
+<p id="contact-status" role="status"></p>
+{% else %}<p>Add a caregiver number to enable these actions.</p>{% endif %}</section>
+<p>{{ summary }}</p>
+</div>
+<script>
+document.getElementById('manual-alert')?.addEventListener('click', async function() {
+  this.disabled=true;const status=document.getElementById('contact-status');status.textContent='Requesting message…';
+  try { const response=await fetch('/notify-caregiver',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const result=await response.json();status.textContent=result.success ? 'Message accepted by the provider. Delivery is not confirmed.' : (result.error || result.detail || 'Message could not be requested.');
+  } catch (_) { status.textContent='Connection lost. Message status is unknown; use the phone dialer if needed.'; }
+  finally {this.disabled=false;}
+});
+</script>
+{% endblock %}

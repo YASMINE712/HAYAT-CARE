@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% include 'security.html' %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitive Quiz | Elderly Care</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .question-card {
+      transition: all 0.3s ease;
+    }
+    .question-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .radio-option {
+      transition: all 0.2s ease;
+    }
+    .radio-option:hover {
+      background-color: #f0f7ff;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-2xl mx-auto px-4 py-8">
+    <form id="cognitive-quiz" class="space-y-6">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <!-- Question 1 -->
+      <div class="question-card bg-white p-6 rounded-xl shadow-sm">
+        <div class="flex items-start mb-4">
+          <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 font-medium">1</span>
+          <p class="text-lg font-medium text-gray-800">How often do you forget recent conversations or events?</p>
+        </div>
+        <div class="space-y-2 pl-11">
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q1" value="3" class="h-4 w-4 text-blue-600 focus:ring-blue-500" required>
+            <span class="ml-3 text-gray-700">Frequently (several times a day)</span>
+          </label>
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q1" value="2" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+            <span class="ml-3 text-gray-700">Sometimes (a few times a week)</span>
+          </label>
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q1" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+            <span class="ml-3 text-gray-700">Rarely or never</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="question-card bg-white p-6 rounded-xl shadow-sm">
+        <div class="flex items-start mb-4">
+          <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 font-medium">2</span>
+          <p class="text-lg font-medium text-gray-800">Do you have trouble finding the right words in conversation?</p>
+        </div>
+        <div class="space-y-2 pl-11">
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q2" value="3" class="h-4 w-4 text-blue-600 focus:ring-blue-500" required>
+            <span class="ml-3 text-gray-700">Yes, often struggle to find words</span>
+          </label>
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q2" value="2" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+            <span class="ml-3 text-gray-700">Sometimes have difficulty</span>
+          </label>
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q2" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+            <span class="ml-3 text-gray-700">No, rarely have this issue</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Question 3 -->
+      <div class="question-card bg-white p-6 rounded-xl shadow-sm">
+        <div class="flex items-start mb-4">
+          <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3 font-medium">3</span>
+          <p class="text-lg font-medium text-gray-800">How often do you misplace items like keys or glasses?</p>
+        </div>
+        <div class="space-y-2 pl-11">
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q3" value="3" class="h-4 w-4 text-blue-600 focus:ring-blue-500" required>
+            <span class="ml-3 text-gray-700">Daily or almost daily</span>
+          </label>
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q3" value="2" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+            <span class="ml-3 text-gray-700">A few times a week</span>
+          </label>
+          <label class="radio-option flex items-center p-3 rounded-lg cursor-pointer">
+            <input type="radio" name="q3" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+            <span class="ml-3 text-gray-700">Rarely or never</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-all duration-300 flex items-center justify-center">
+        <i class="fas fa-paper-plane mr-2"></i> Submit Assessment
+      </button>
+    </form>
+  </div>
+
+  <script>
+  document.getElementById('cognitive-quiz').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Collect all answers
+    const answers = {
+      q1: document.querySelector('input[name="q1"]:checked')?.value,
+      q2: document.querySelector('input[name="q2"]:checked')?.value,
+      q3: document.querySelector('input[name="q3"]:checked')?.value
+    };
+
+    // Calculate quiz_score and quiz_accuracy
+    let quiz_score = 0;
+    let healthy_count = 0;
+    const totalQuestions = 3;
+    for (const v of Object.values(answers)) {
+      const val = parseInt(v);
+      quiz_score += val;
+      if (val === 1) healthy_count += 1;
+    }
+    const quiz_accuracy = healthy_count / totalQuestions;
+
+    // Submit to backend for ML model
+    try {
+      const response = await fetch('/games/quiz/submit', {
+        method: 'POST',
+        body: new URLSearchParams({
+          'score': quiz_score,
+          'accuracy': quiz_accuracy
+        })
+      });
+      const result = await response.json();
+      if (result.success && result.next_game) {
+        window.location.href = result.next_game;
+      } else {
+        alert('There was an error submitting your assessment. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
+      alert('There was an error submitting your assessment. Please try again.');
+    }
+  });
+</script>
+</body>
+</html>
+{% endblock %}

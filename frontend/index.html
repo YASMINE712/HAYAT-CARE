@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CareAI - Smart Elderly Care Solutions</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                  0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .feature-card {
+      transition: all 0.3s ease;
+    }
+    .text-xxl {
+      font-size: 2.5rem;
+      line-height: 1.2;
+    }
+    @media (min-width: 768px) {
+      .text-xxl {
+        font-size: 3.5rem;
+      }
+    }
+  </style>
+</head>
+<body class="bg-blue-50 font-sans text-gray-800">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md py-4 px-6 md:px-12">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-heartbeat text-3xl text-blue-600"></i>
+        <span class="text-2xl font-bold text-blue-800">CareAI</span>
+      </div>
+      <div class="hidden md:flex space-x-8">
+        <a href="#" class="text-lg font-medium text-blue-800 hover:text-blue-600">Home</a>
+        <a href="#" class="text-lg font-medium text-gray-600 hover:text-blue-600">Features</a>
+        <a href="#" class="text-lg font-medium text-gray-600 hover:text-blue-600">About</a>
+        <a href="#" class="text-lg font-medium text-gray-600 hover:text-blue-600">Contact</a>
+        <a href="signup.html" class="text-lg font-medium text-gray-600 hover:text-blue-600">Sign up</a>
+      </div>
+      <button class="md:hidden text-blue-800">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="py-16 px-6 md:px-12 bg-gradient-to-r from-blue-100 to-green-50">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center">
+      <div class="md:w-1/2 mb-12 md:mb-0">
+        <h1 class="text-xxl font-bold text-blue-900 leading-tight mb-6">
+          Smart Health Monitoring for Independent Seniors
+        </h1>
+        <p class="text-xl text-gray-700 mb-8">
+          Our AI-powered system provides peace of mind for families while helping seniors maintain independence with dignity.
+        </p>
+        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full text-lg transition duration-300 transform hover:scale-105">
+          Learn More <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+      <div class="md:w-1/2 flex justify-center">
+        <img src="images/hero.jpg"
+             alt="Happy elderly woman with caregiver"
+             class="rounded-2xl shadow-xl max-w-md w-full floating object-cover h-96">
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-20 px-6 md:px-12 bg-white">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-blue-900 mb-16">
+        How CareAI Supports Your Loved Ones
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="bg-blue-50 rounded-xl p-8 feature-card">
+          <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-heartbeat text-2xl text-blue-700"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-blue-900 mb-4">Real-time Health Monitoring</h3>
+          <p class="text-gray-700 text-lg">
+            Continuous tracking of vital signs including heart rate, blood pressure, and oxygen levels with smart alerts for any abnormalities.
+          </p>
+        </div>
+        <!-- Feature 2 -->
+        <div class="bg-green-50 rounded-xl p-8 feature-card">
+          <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-robot text-2xl text-green-700"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-green-900 mb-4">AI Health Assistant</h3>
+          <p class="text-gray-700 text-lg">
+            Personalized health recommendations, medication reminders, and answers to health questions through our friendly AI companion.
+          </p>
+        </div>
+        <!-- Feature 3 -->
+        <div class="bg-purple-50 rounded-xl p-8 feature-card">
+          <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-exclamation-triangle text-2xl text-purple-700"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-purple-900 mb-4">Fall Prediction & Alerts</h3>
+          <p class="text-gray-700 text-lg">
+            Advanced algorithms detect fall risks and immediately notify caregivers if a fall occurs, with 98% accuracy.
+          </p>
+        </div>
+        <!-- Feature 4 -->
+        <div class="bg-yellow-50 rounded-xl p-8 feature-card">
+          <div class="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-home text-2xl text-yellow-700"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-yellow-900 mb-4">Smart Home Integration</h3>
+          <p class="text-gray-700 text-lg">
+            Seamless connection with smart home devices to adjust lighting, temperature, and security based on daily routines.
+          </p>
+        </div>
+        <!-- Feature 5 -->
+        <div class="bg-red-50 rounded-xl p-8 feature-card">
+          <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-brain text-2xl text-red-700"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-red-900 mb-4">Cognitive Health Support</h3>
+          <p class="text-gray-700 text-lg">
+            Early detection of memory changes with daily cognitive exercises and alerts for potential Alzheimer's warning signs.
+          </p>
+        </div>
+        <!-- Feature 6 -->
+        <div class="bg-teal-50 rounded-xl p-8 feature-card">
+          <div class="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-users text-2xl text-teal-700"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-teal-900 mb-4">Family Connection</h3>
+          <p class="text-gray-700 text-lg">
+            Easy-to-use dashboard keeps family members informed and connected with video calls, activity updates, and health reports.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 px-6 md:px-12 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+    <div class="max-w-7xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">
+        Explore CareAI's Features
+      </h2>
+      <p class="text-xl mb-8 max-w-3xl mx-auto">
+        Discover how our AI-driven solutions can enhance the quality of life for seniors and provide peace of mind for families.
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <button class="bg-white text-blue-800 hover:bg-blue-100 font-bold py-4 px-8 rounded-full text-lg transition duration-300">
+          Learn More <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+        <button class="border-2 border-white text-white hover:bg-white hover:text-blue-800 font-bold py-4 px-8 rounded-full text-lg transition duration-300">
+          Contact Us
+        </button>
+      </div>
+    </div
+::contentReference[oaicite:20]{index=20}
+ 

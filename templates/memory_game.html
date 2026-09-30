@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% include 'security.html' %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🧠 Memory Match – Multi-Level Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8fafc;
+    }
+    .card {
+      transition: all 0.3s ease;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+    .card-inner {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      backface-visibility: hidden;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+    }
+    .card-front {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      transform: rotateY(180deg);
+    }
+    .card-back {
+      background: white;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .matched .card-front {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+    .game-board {
+      display: grid;
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      transition: all 0.2s ease;
+      transform: scale(1);
+    }
+    .btn:hover {
+      transform: scale(1.05);
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .modal {
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-indigo-800 mb-2">🧠 Memory Matching Game</h1>
+      <p class="text-lg text-gray-600 mb-6">Match all pairs as quickly and accurately as possible to test your memory.</p>
+      
+      <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">
+            <span class="font-semibold">Attempts:</span> <span id="attempts-counter">0</span>
+          </div>
+          <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">
+            <span class="font-semibold">Time:</span> <span id="timer">0</span>s
+          </div>
+          <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">
+            <span class="font-semibold">Level:</span> <span id="level-display">1</span>/6
+          </div>
+        </div>
+        
+        <div class="game-board"></div>
+      </div>
+
+      <div class="btn-group">
+        <button onclick="restartLevel()" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">🔁 Restart Level</button>
+      </div>
+    </div>
+  </div>
+
+  <a id="next-game-btn"
+     href="{{ url_for('drag_shapes') }}"
+     class="mt-6 inline-block bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-indigo-700 transition hidden">
+    Next Game <i class="fas fa-arrow-right ml-2"></i>
+  </a>
+
+  <script>
+    const levels = [
+      { size: [2, 2], emojis: ['🍎', '🍌'] }, // 2 pairs
+      { size: [2, 3], emojis: ['🎈', '🎁', '🎉'] }, // 3 pairs
+      { size: [2, 4], emojis: ['😀', '😎', '😢', '😡'] }, // 4 pairs
+      { size: [3, 4], emojis: ['🐶', '🐱', '🐭', '🐰', '🐸', '🦊'] }, // 6 pairs
+      { size: [4, 4], emojis: ['🍕', '🍔', '🍟', '🌮', '🍩', '🍦', '🍫', '🥤'] }, // 8 pairs
+      { size: [4, 5], emojis: ['🚗', '✈️', '🚀', '🚲', '🚜', '🚒', '🚕', '🚓', '🚂', '🛴'] }, // 10 pairs
+    ];
+    let currentLevel = 0;
+
+    let firstCard = null, secondCard = null, lock = false;
+    let matches = 0, attempts = 0, startTime, timerInterval;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function loadLevel(index) {
+      const { size, emojis } = levels[index];
+      const [rows, cols] = size;
+      const board = document.querySelector(".game-board");
+      board.innerHTML = '';
+      board.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+
+      const cards = [...emojis, ...emojis];
+      shuffle(cards);
+
+      cards.forEach(emoji => {
+        const card = document.createElement("div");
+        card.className = "card aspect-square";
+        card.dataset.emoji = emoji;
+        card.innerHTML = `
+          <div class="card-inner w-full h-full relative">
+            <div class="card-back rounded-lg flex items-center justify-center text-4xl"></div>
+            <div class="card-front rounded-lg flex items-center justify-center text-4xl">${emoji}</div>
+          </div>
+        `;
+        card.addEventListener("click", flipCard);
+        board.appendChild(card);
+      });
+
+      // Reset game state
+      firstCard = secondCard = null;
+      lock = false;
+      matches = 0;
+      attempts = 0;
+      document.getElementById("attempts-counter").textContent = 0;
+      document.getElementById("level-display").textContent = index + 1;
+      clearInterval(timerInterval);
+      document.getElementById("timer").textContent = 0;
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const time = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById("timer").textContent = time;
+      }, 1000);
+      document.getElementById('next-game-btn').classList.add('hidden');
+    }
+
+    function flipCard() {
+      if (lock || this.classList.contains("matched") || this === firstCard) return;
+      this.classList.add("flipped");
+      attempts++;
+      document.getElementById("attempts-counter").textContent = attempts;
+
+      if (!firstCard) {
+        firstCard = this;
+        return;
+      }
+
+      secondCard = this;
+      lock = true;
+
+      if (firstCard.dataset.emoji === secondCard.dataset.emoji) {
+        firstCard.classList.add("matched");
+        secondCard.classList.add("matched");
+        matches++;
+        if (matches === levels[currentLevel].emojis.length) {
+          endGame();
+        }
+        resetTurn();
+      } else {
+        setTimeout(() => {
+          firstCard.classList.remove("flipped");
+          secondCard.classList.remove("flipped");
+          resetTurn();
+        }, 800);
+      }
+    }
+
+    function resetTurn() {
+      [firstCard, secondCard] = [null, null];
+      lock = false;
+    }
+
+    function calculateGameMetrics() {
+      const time = Math.floor((Date.now() - startTime) / 1000);
+      const accuracy = matches / attempts;
+      const score = Math.round((matches * 1000) / (time + 1)); // Score formula
+      
+      return {
+        score: score,
+        attempts: attempts,
+        duration: time,
+        accuracy: accuracy,
+        level: currentLevel + 1,
+        pairsMatched: matches,
+        totalPairs: levels[currentLevel].emojis.length
+      };
+    }
+
+    async function submitGameResults() {
+      const metrics = calculateGameMetrics();
+      
+      try {
+        const response = await fetch('/games/memory/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            'score': metrics.score,
+            'attempts': metrics.attempts,
+            'duration': metrics.duration,
+            'accuracy': metrics.accuracy
+          })
+        });
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Error submitting results:', error);
+        return { success: false, next_game: '/summary' };
+      }
+    }
+
+    async function showLevelComplete() {
+      await submitGameResults();
+
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal';
+
+      let modalContent = `
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 text-center">
+          <h3 class="text-2xl font-bold text-indigo-600 mb-4">Level Complete!</h3>
+          <p class="mb-4">Score: ${calculateGameMetrics().score}</p>
+      `;
+
+      if (currentLevel + 1 < levels.length) {
+        modalContent += `
+          <button onclick="nextLevel()" class="btn bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            Next Level
+          </button>
+        `;
+      } else {
+        modalContent += `
+          <a href="{{ url_for('drag_shapes') }}" class="btn bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            Next Game <i class='fas fa-arrow-right ml-2'></i>
+          </a>
+        `;
+        setTimeout(() => {
+          document.getElementById('next-game-btn').classList.remove('hidden');
+        }, 500);
+      }
+
+      modalContent += `</div>`;
+      modal.innerHTML = modalContent;
+
+      document.body.appendChild(modal);
+      modal.querySelector('button, a').focus();
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      showLevelComplete();
+    }
+
+    function nextLevel() {
+      const modal = document.querySelector('.fixed');
+      if (modal) modal.remove();
+      currentLevel++;
+      loadLevel(currentLevel);
+    }
+
+    function restartLevel() {
+      const modal = document.querySelector('.fixed');
+      if (modal) modal.remove();
+      loadLevel(currentLevel);
+    }
+
+    window.onload = () => {
+      loadLevel(currentLevel);
+    };
+  </script>
+</body>
+</html>

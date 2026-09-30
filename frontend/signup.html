@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CareAI - Sign Up / Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    .link {
+      @apply text-blue-600 hover:underline;
+    }
+    .form-container {
+      background: linear-gradient(to bottom right, #ebf8ff, #d1fae5);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center form-container font-sans">
+  <div class="bg-white shadow-xl rounded-2xl overflow-hidden w-full max-w-4xl grid md:grid-cols-2">
+    <!-- Sign Up / Login Forms -->
+    <div class="p-10">
+      <div id="form-header" class="mb-6">
+        <h2 id="form-title" class="text-3xl font-bold text-blue-800 mb-2">Sign Up</h2>
+        <p class="text-gray-600">Create your CareAI account</p>
+      </div>
+
+      <!-- Form -->
+      <form id="auth-form" class="space-y-6">
+        <div id="name-field">
+          <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+          <input type="text" id="name" name="name" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" />
+        </div>
+
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+          <input type="email" id="email" name="email" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <input type="password" id="password" name="password" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" />
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-300">
+          Sign Up
+        </button>
+
+        <p class="text-center text-sm text-gray-600">
+          Already have an account?
+          <a href="#" onclick="toggleForm(true)" class="link">Log in here</a>
+        </p>
+      </form>
+    </div>
+
+    <!-- Image / Illustration -->
+    <div class="bg-blue-100 flex items-center justify-center">
+      <img src="images/signup.webp" alt="Login Illustration" class="w-full h-full object-cover">
+    </div>
+  </div>
+
+  <script>
+    const formTitle = document.getElementById('form-title');
+    const formHeader = document.getElementById('form-header');
+    const authForm = document.getElementById('auth-form');
+    const nameField = document.getElementById('name-field');
+
+    function toggleForm(isLogin) {
+      if (isLogin) {
+        formTitle.innerText = 'Log In';
+        nameField.style.display = 'none';
+        authForm.querySelector('button').innerText = 'Log In';
+        formHeader.querySelector('p').innerHTML = 'Welcome back to CareAI';
+        authForm.querySelector('p').innerHTML = `Don't have an account? <a href="#" onclick="toggleForm(false)" class="link">Sign up here</a>`;
+      } else {
+        formTitle.innerText = 'Sign Up';
+        nameField.style.display = 'block';
+        authForm.querySelector('button').innerText = 'Sign Up';
+        formHeader.querySelector('p').innerHTML = 'Create your CareAI account';
+        authForm.querySelector('p').innerHTML = `Already have an account? <a href="#" onclick="toggleForm(true)" class="link">Log in here</a>`;
+      }
+    }
+  </script>
+</body>
+</html>

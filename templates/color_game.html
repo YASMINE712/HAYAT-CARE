@@ -1,0 +1,499 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% include 'security.html' %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎨 Color Memory Challenge – Cognitive Assessment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+    
+    .color-box {
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    .color-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .color-box.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    
+    .correct {
+      animation: pulseCorrect 0.5s;
+      box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3);
+    }
+    
+    .wrong {
+      animation: pulseWrong 0.5s;
+      box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.3);
+    }
+    
+    .memory-phase {
+      border: 3px solid #FFD700;
+      animation: glow 1s infinite alternate;
+    }
+    
+    @keyframes glow {
+      from { box-shadow: 0 0 5px #FFD700; }
+      to { box-shadow: 0 0 20px #FFD700, 0 0 30px #FFD700; }
+    }
+    
+    @keyframes pulseCorrect {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes pulseWrong {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    
+    .progress-bar {
+      height: 10px;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+    
+    .game-container {
+      max-width: 700px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .phase-indicator {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+    
+    .memorize-phase {
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      color: white;
+    }
+    
+    .recall-phase {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+    }
+    
+    .countdown {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #FF6B6B;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center p-4">
+  <div class="game-container p-8 w-full">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-indigo-700 mb-2">
+        <i class="fas fa-brain mr-2"></i>Color Memory Challenge
+      </h1>
+      <p class="text-gray-600">Memorize the color sequence, then recreate it</p>
+    </div>
+    
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium text-gray-700">Round: <span id="round-counter">1</span>/<span id="max-rounds">10</span></span>
+        <div id="phase-indicator" class="phase-indicator memorize-phase">
+          <i class="fas fa-eye mr-1"></i>Memorize
+        </div>
+        <span class="text-sm font-medium text-gray-700">Score: <span id="score-display">0</span></span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2.5">
+        <div id="progress-bar" class="progress-bar bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
+      </div>
+    </div>
+    
+    <!-- Instructions -->
+    <div id="instructions" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-info-circle text-blue-400"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-blue-700 font-medium">Round <span id="instruction-round">1</span>:</p>
+          <p class="text-blue-600" id="instruction-text">Watch carefully as colors light up in sequence...</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Countdown Display -->
+    <div id="countdown-display" class="text-center mb-6 hidden">
+      <div class="countdown" id="countdown-number">3</div>
+      <p class="text-gray-600">Get ready...</p>
+    </div>
+    
+    <!-- Sequence Display -->
+    <div id="sequence-display" class="text-center mb-6 hidden">
+      <h3 class="text-xl font-bold text-gray-700 mb-4">Remember this sequence:</h3>
+      <div id="sequence-colors" class="grid grid-cols-3 sm:grid-cols-6 gap-3 justify-items-center max-w-md mx-auto"></div>
+    </div>
+    
+    <!-- Color Grid -->
+    <div id="color-options" class="grid grid-cols-3 sm:grid-cols-4 gap-4 mb-8 justify-items-center"></div>
+    
+    <!-- User's Sequence -->
+    <div id="user-sequence-container" class="mb-6 hidden">
+      <h4 class="text-lg font-medium text-gray-700 mb-3 text-center">Your sequence:</h4>
+      <div id="user-sequence" class="flex flex-wrap justify-center gap-2"></div>
+      <div class="text-center mt-4">
+        <button id="clear-sequence" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300 mr-2">
+          <i class="fas fa-undo mr-1"></i>Clear
+        </button>
+        <button id="submit-sequence" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+          <i class="fas fa-check mr-1"></i>Submit Sequence
+        </button>
+      </div>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      <form method="POST" action="/games/color/submit" class="w-full sm:w-auto" id="results-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="score" id="score">
+        <input type="hidden" name="attempts" id="attempts">
+        <input type="hidden" name="duration" id="duration">
+        <input type="hidden" name="accuracy" id="accuracy">
+        <button type="submit" id="submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          <i class="fas fa-paper-plane mr-2"></i>Submit Results
+        </button>
+      </form>
+      
+      <a id="next-game-btn"
+         href="{{ url_for('stroop_game') }}"
+         class="mt-6 inline-block bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-indigo-700 transition hidden">
+        Next Game <i class="fas fa-arrow-right ml-2"></i>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const colors = [
+      { name: "Red", code: "#FF5252", text: "RED" },
+      { name: "Green", code: "#4CAF50", text: "GREEN" },
+      { name: "Blue", code: "#2196F3", text: "BLUE" },
+      { name: "Yellow", code: "#FFEB3B", text: "YELLOW" },
+      { name: "Purple", code: "#9C27B0", text: "PURPLE" },
+      { name: "Orange", code: "#FF9800", text: "ORANGE" },
+      { name: "Pink", code: "#E91E63", text: "PINK" },
+      { name: "Cyan", code: "#00BCD4", text: "CYAN" }
+    ];
+
+    const maxRounds = 10;
+    let round = 0;
+    let score = 0;
+    let totalAttempts = 0;
+    let correctSequences = 0;
+    let startTime = Date.now();
+    let endTime;
+    let currentSequence = [];
+    let userSequence = [];
+    let gamePhase = 'memorize'; // 'memorize', 'recall'
+    let sequenceLength = 2; // Starting sequence length
+
+    const roundCounterEl = document.getElementById("round-counter");
+    const scoreDisplayEl = document.getElementById("score-display");
+    const progressBarEl = document.getElementById("progress-bar");
+    const maxRoundsEl = document.getElementById("max-rounds");
+    const phaseIndicatorEl = document.getElementById("phase-indicator");
+    const instructionsEl = document.getElementById("instructions");
+    const instructionRoundEl = document.getElementById("instruction-round");
+    const instructionTextEl = document.getElementById("instruction-text");
+    const countdownEl = document.getElementById("countdown-display");
+    const countdownNumberEl = document.getElementById("countdown-number");
+    const sequenceDisplayEl = document.getElementById("sequence-display");
+    const sequenceColorsEl = document.getElementById("sequence-colors");
+    const colorOptionsEl = document.getElementById("color-options");
+    const userSequenceContainerEl = document.getElementById("user-sequence-container");
+    const userSequenceEl = document.getElementById("user-sequence");
+
+    maxRoundsEl.textContent = maxRounds;
+
+    function shuffle(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function generateSequence() {
+      const sequence = [];
+      for (let i = 0; i < sequenceLength; i++) {
+        sequence.push(colors[Math.floor(Math.random() * colors.length)]);
+      }
+      return sequence;
+    }
+
+    function showCountdown() {
+      countdownEl.classList.remove('hidden');
+      let count = 3;
+      countdownNumberEl.textContent = count;
+      
+      const countdown = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownNumberEl.textContent = count;
+        } else {
+          clearInterval(countdown);
+          countdownEl.classList.add('hidden');
+          showSequence();
+        }
+      }, 1000);
+    }
+
+    function showSequence() {
+      sequenceColorsEl.innerHTML = '';
+      currentSequence.forEach((color, index) => {
+        const colorDiv = document.createElement('div');
+        colorDiv.className = 'w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xs';
+        colorDiv.style.backgroundColor = color.code;
+        colorDiv.textContent = color.text;
+        colorDiv.style.opacity = '0';
+        colorDiv.style.animation = `fadeIn 0.5s ease-in-out ${index * 0.5}s forwards`;
+        sequenceColorsEl.appendChild(colorDiv);
+      });
+
+      sequenceDisplayEl.classList.remove('hidden');
+      
+      // Hide sequence after showing all colors plus 2 seconds
+      setTimeout(() => {
+        sequenceDisplayEl.classList.add('hidden');
+        startRecallPhase();
+      }, (currentSequence.length * 500) + 2000);
+    }
+
+    function startRecallPhase() {
+      gamePhase = 'recall';
+      phaseIndicatorEl.className = 'phase-indicator recall-phase';
+      phaseIndicatorEl.innerHTML = '<i class="fas fa-hand-pointer mr-1"></i>Recall';
+      
+      instructionTextEl.textContent = `Click the colors in the same order you saw them (${sequenceLength} colors)`;
+      
+      createColorGrid();
+      userSequenceContainerEl.classList.remove('hidden');
+      userSequence = [];
+      updateUserSequenceDisplay();
+    }
+
+    function createColorGrid() {
+      colorOptionsEl.innerHTML = '';
+      const shuffledColors = shuffle(colors);
+      
+      shuffledColors.forEach(color => {
+        const box = document.createElement('div');
+        box.className = 'color-box';
+        box.style.backgroundColor = color.code;
+        box.textContent = color.text;
+        box.dataset.name = color.name;
+        box.addEventListener('click', () => handleColorClick(color));
+        colorOptionsEl.appendChild(box);
+      });
+    }
+
+    function handleColorClick(color) {
+      if (gamePhase !== 'recall') return;
+      
+      userSequence.push(color);
+      updateUserSequenceDisplay();
+      
+      if (userSequence.length === currentSequence.length) {
+        setTimeout(checkSequence, 500);
+      }
+    }
+
+    function updateUserSequenceDisplay() {
+      userSequenceEl.innerHTML = '';
+      userSequence.forEach((color, index) => {
+        const colorDiv = document.createElement('div');
+        colorDiv.className = 'w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-xs border-2 border-gray-300';
+        colorDiv.style.backgroundColor = color.code;
+        colorDiv.textContent = index + 1;
+        userSequenceEl.appendChild(colorDiv);
+      });
+    }
+
+    function checkSequence() {
+      totalAttempts++;
+      let correct = true;
+      
+      for (let i = 0; i < currentSequence.length; i++) {
+        if (!userSequence[i] || userSequence[i].name !== currentSequence[i].name) {
+          correct = false;
+          break;
+        }
+      }
+      
+      if (correct) {
+        score++;
+        correctSequences++;
+        showFeedback(true, "Perfect! Sequence correct!");
+      } else {
+        showFeedback(false, "Incorrect sequence. Try to remember better next time!");
+      }
+
+      setTimeout(() => {
+        nextRound();
+      }, 2000);
+    }
+
+    function showFeedback(isCorrect, message) {
+      const feedbackEl = document.createElement('div');
+      feedbackEl.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg font-medium z-50 ${
+        isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+      }`;
+      feedbackEl.innerHTML = `<i class="fas ${isCorrect ? 'fa-check' : 'fa-times'} mr-2"></i>${message}`;
+      document.body.appendChild(feedbackEl);
+      
+      setTimeout(() => {
+        feedbackEl.remove();
+      }, 2000);
+    }
+
+    function nextRound() {
+      if (round >= maxRounds) {
+        endGame();
+        return;
+      }
+
+      round++;
+      
+      // Increase difficulty every 3 rounds
+      if (round > 1 && (round - 1) % 3 === 0 && sequenceLength < 6) {
+        sequenceLength++;
+      }
+      
+      roundCounterEl.textContent = round;
+      progressBarEl.style.width = `${(round / maxRounds) * 100}%`;
+      instructionRoundEl.textContent = round;
+      
+      // Reset phase
+      gamePhase = 'memorize';
+      phaseIndicatorEl.className = 'phase-indicator memorize-phase';
+      phaseIndicatorEl.innerHTML = '<i class="fas fa-eye mr-1"></i>Memorize';
+      
+      instructionTextEl.textContent = `Watch carefully as ${sequenceLength} colors appear in sequence...`;
+      
+      // Hide recall elements
+      userSequenceContainerEl.classList.add('hidden');
+      colorOptionsEl.innerHTML = '';
+      
+      // Generate new sequence
+      currentSequence = generateSequence();
+      
+      setTimeout(() => {
+        showCountdown();
+      }, 1000);
+    }
+
+    function endGame() {
+      endTime = Date.now();
+      const duration = Math.round((endTime - startTime) / 1000);
+      const accuracy = totalAttempts > 0 ? (correctSequences / totalAttempts) : 0;
+      const finalScore = Math.round((score / maxRounds) * 100);
+
+      document.getElementById("score").value = finalScore;
+      document.getElementById("attempts").value = totalAttempts;
+      document.getElementById("duration").value = duration;
+      document.getElementById("accuracy").value = accuracy;
+
+      // Show completion alert
+      const alertBox = document.createElement('div');
+      alertBox.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      alertBox.innerHTML = `
+        <div class="bg-white p-8 rounded-xl max-w-md w-full mx-4 text-center">
+          <div class="text-5xl mb-4">🧠</div>
+          <h3 class="text-2xl font-bold text-indigo-700 mb-2">Memory Test Complete!</h3>
+          <div class="space-y-2 mb-6">
+            <p class="text-lg"><span class="font-medium">Sequences Correct:</span> ${score}/${maxRounds}</p>
+            <p class="text-lg"><span class="font-medium">Total Attempts:</span> ${totalAttempts}</p>
+            <p class="text-lg"><span class="font-medium">Accuracy:</span> ${Math.round(accuracy * 100)}%</p>
+            <p class="text-lg"><span class="font-medium">Time:</span> ${duration}s</p>
+            <p class="text-xl font-bold mt-4">Final Score: <span class="text-indigo-600">${finalScore}%</span></p>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            Continue
+          </button>
+        </div>
+      `;
+      document.body.appendChild(alertBox);
+
+      document.getElementById("submit-btn").disabled = false;
+      document.getElementById("next-game-btn").style.display = "inline-block";
+      document.getElementById('next-game-btn').classList.remove('hidden');
+      
+      // Automatically submit the form after 3 seconds
+      setTimeout(() => {
+        document.getElementById("results-form").submit();
+      }, 3000);
+    }
+
+    // Event listeners
+    document.getElementById('clear-sequence').addEventListener('click', () => {
+      userSequence = [];
+      updateUserSequenceDisplay();
+    });
+
+    document.getElementById('submit-sequence').addEventListener('click', () => {
+      if (userSequence.length === currentSequence.length) {
+        checkSequence();
+      } else {
+        showFeedback(false, `Please select ${currentSequence.length} colors first!`);
+      }
+    });
+
+    // Add CSS animation for fadeIn
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Start the game
+    setTimeout(() => {
+      nextRound();
+    }, 1000);
+  </script>
+</body>
+</html>

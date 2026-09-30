@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Edit profile — HayatCare{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto"><h1 class="text-3xl font-bold mb-5">Edit patient profile</h1>
+<form method="post" class="space-y-4"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% for key,label in [('name','Name'),('age','Age'),('weight','Weight (kg)'),('height','Height (cm)'),('gender','Gender'),('diseases','Conditions, separated by commas'),('emergency_contact','Caregiver phone, including country code')] %}
+<label class="block">{{ label }}<input class="block border p-2 rounded w-full" name="{{ key }}" value="{{ profile.get(key,'') }}"></label>{% endfor %}
+<label class="block">Medications, separated by commas<input class="block border p-2 rounded w-full" name="medications" value="{{ profile.medications|join(', ') }}"></label>
+<label class="block"><input type="checkbox" name="fall_history" {% if profile.fall_history %}checked{% endif %}> History of falls</label>
+<button class="bg-blue-700 text-white p-3 rounded">Save profile</button></form></div>
+{% endblock %}

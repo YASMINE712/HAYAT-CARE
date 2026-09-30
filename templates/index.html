@@ -1,0 +1,679 @@
+{% extends "base.html" %}
+{% block title %}Elderly Care Digital Twin - HayatCare{% endblock %}
+{% block content %}
+
+<style>
+.card,
+.patient-card,
+.house-card,
+.annotated-image-card,
+.risk-card,
+.vital-card {
+    background: #fff;
+    color: #222;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border-radius: 10px;
+}
+.annotation {
+    position: absolute;
+    border: 2px solid #ff0000;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+.annotation-label {
+    background: rgba(255,0,0,0.7);
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 4px;
+    position: absolute;
+    left: 0; top: 0;
+    z-index: 2;
+    border-radius: 0 0 4px 0;
+}
+.image-modal {
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.image-modal-content {
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+.image-modal-content img {
+    max-width: 80vw;
+    max-height: 80vh;
+    display: block;
+}
+.image-modal-content .close-btn {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #222;
+}
+</style>
+
+<div class="container">
+    <header>
+        <h1><i class="fas fa-user-md"></i> Elderly Care Digital Twin</h1>
+        <p>Create a virtual representation of your patient and their living environment</p>
+    </header>
+
+    <div class="dashboard">
+        <!-- Patient Digital Twin Card -->
+        <div class="card patient-card">
+            <div class="card-header">
+                <h2><i class="fas fa-user"></i> Patient Digital Twin</h2>
+                <span class="status-badge" id="patient-status">Not Configured</span>
+            </div>
+            <div class="card-body">
+                <div class="patient-avatar">
+                    <div class="avatar-circle" id="patient-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="patient-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Mobility</span>
+                            <span class="stat-value" id="stat-mobility">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Vision</span>
+                            <span class="stat-value" id="stat-vision">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Cognition</span>
+                            <span class="stat-value" id="stat-cognitive">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="patient-details">
+                    <div class="detail-item">
+                        <i class="fas fa-pills"></i>
+                        <span id="detail-medications">No medications</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-procedures"></i>
+                        <span id="detail-falls">No fall history</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-heart"></i>
+                        <span id="detail-vitals">Loading vitals...</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="detail-name">No name set</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-birthday-cake"></i>
+                        <span id="detail-age">No age set</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-stethoscope"></i>
+                        <span id="detail-conditions">No conditions</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button id="edit-patient-btn"><i class="fas fa-edit"></i> Edit Profile</button>
+                <button id="refresh-vitals-btn"><i class="fas fa-sync"></i> Refresh Vitals</button>
+                <button id="view-profile-btn"><i class="fas fa-user-circle"></i> View Full Profile</button>
+            </div>
+        </div>
+
+        <!-- House Digital Twin Card -->
+        <div class="card house-card">
+            <div class="card-header">
+                <h2><i class="fas fa-home"></i> House Digital Twin</h2>
+                <span class="status-badge" id="house-status">Empty</span>
+            </div>
+            <div class="card-body">
+                <div class="house-visualization" id="house-visualization">
+                    <div class="empty-state">
+                        <i class="fas fa-door-open"></i>
+                        <p>No rooms added yet</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button id="add-room-btn"><i class="fas fa-plus"></i> Add Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Annotated Image Card -->
+    <div class="card annotated-image-card">
+        <div class="card-header">
+            <h2><i class="fas fa-search"></i> Room Analysis</h2>
+        </div>
+        <div class="card-body">
+            <div class="annotated-image-container" id="annotated-image-container">
+                <div class="empty-state">
+                    <i class="fas fa-image"></i>
+                    <p>Upload a room image to see object detection results</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario Section -->
+    <div class="scenario-section">
+        <h2><i class="fas fa-running"></i> Scenario Simulation</h2>
+        <div class="scenario-controls">
+            <div class="input-group">
+                <label for="activity"><i class="fas fa-walking"></i> Activity:</label>
+                <input type="text" id="activity" placeholder="e.g. walk to bathroom at night">
+            </div>
+            <div class="input-group">
+                <label for="time-of-day"><i class="fas fa-clock"></i> Time:</label>
+                <select id="time-of-day">
+                    <option value="day">Day</option>
+                    <option value="night">Night</option>
+                    <option value="evening">Evening</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="events"><i class="fas fa-calendar-alt"></i> Events:</label>
+                <input type="text" id="events" placeholder="e.g. power outage, visitor">
+            </div>
+            <button id="run-scenario-btn"><i class="fas fa-play"></i> Run Scenario</button>
+        </div>
+        <div class="recommendations-card">
+            <h3><i class="fas fa-lightbulb"></i> Safety Recommendations</h3>
+            <div class="recommendations-content" id="recommendations">
+                <div class="empty-state">
+                    <i class="fas fa-comment-alt"></i>
+                    <p>Run a scenario to get personalized safety recommendations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="patient-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2><i class="fas fa-user-edit"></i> Patient Profile</h2>
+            <form id="patient-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="patient-name"><i class="fas fa-signature"></i> Full Name:</label>
+                    <input type="text" id="patient-name" placeholder="Patient full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="patient-age"><i class="fas fa-birthday-cake"></i> Age:</label>
+                    <input type="number" id="patient-age" min="60" max="120" placeholder="Age" required>
+                </div>
+                <div class="form-group">
+                    <label for="patient-gender"><i class="fas fa-venus-mars"></i> Gender:</label>
+                    <select id="patient-gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mobility"><i class="fas fa-wheelchair"></i> Mobility:</label>
+                    <select id="mobility">
+                        <option value="normal">Normal</option>
+                        <option value="limited">Limited</option>
+                        <option value="wheelchair">Wheelchair</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vision"><i class="fas fa-eye"></i> Vision:</label>
+                    <select id="vision">
+                        <option value="normal">Normal</option>
+                        <option value="impaired">Impaired</option>
+                        <option value="legally_blind">Legally Blind</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cognitive"><i class="fas fa-brain"></i> Cognitive State:</label>
+                    <select id="cognitive">
+                        <option value="normal">Normal</option>
+                        <option value="mild_decline">Mild Decline</option>
+                        <option value="moderate_decline">Moderate Decline</option>
+                        <option value="severe_decline">Severe Decline</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="medications"><i class="fas fa-pills"></i> Current Medications:</label>
+                    <textarea id="medications" rows="3" placeholder="List current medications, separated by commas"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="conditions"><i class="fas fa-disease"></i> Medical Conditions:</label>
+                    <textarea id="conditions" rows="3" placeholder="List medical conditions, separated by commas"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="allergies"><i class="fas fa-exclamation-triangle"></i> Allergies:</label>
+                    <input type="text" id="allergies" placeholder="e.g. penicillin, nuts">
+                </div>
+                <div class="form-group">
+                    <label for="emergency-contact"><i class="fas fa-phone"></i> Emergency Contact:</label>
+                    <input type="text" id="emergency-contact" placeholder="Name and phone number">
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="fall_history">
+                    <label for="fall_history">History of falls</label>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="surgery_history">
+                    <label for="surgery_history">Recent surgery history</label>
+                </div>
+                <button type="button" id="save-patient-btn"><i class="fas fa-save"></i> Save Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="room-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2><i class="fas fa-plus-circle"></i> Add Room</h2>
+            <form id="room-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="room-name"><i class="fas fa-door-open"></i> Room Name:</label>
+                    <input type="text" id="room-name" placeholder="e.g. kitchen, bathroom, bedroom" required>
+                </div>
+                <div class="form-group">
+                    <label for="room-image"><i class="fas fa-camera"></i> Upload Image:</label>
+                    <input type="file" id="room-image" accept="image/*" required>
+                </div>
+                <div class="preview-container" id="image-preview">
+                    <div class="empty-preview">
+                        <i class="fas fa-image"></i>
+                        <p>No image selected</p>
+                    </div>
+                </div>
+                <button type="button" id="upload-room-btn"><i class="fas fa-upload"></i> Upload & Analyze</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inject Flask data into JS
+    let patientTwin = {{ patient_data|tojson|safe }} || {};
+    let houseTwin = {{ house_data|tojson|safe }} || {};
+    let vitals = {{ vitals|tojson|safe }};
+
+    // DOM elements
+    const editPatientBtn = document.getElementById('edit-patient-btn');
+    const viewProfileBtn = document.getElementById('view-profile-btn');
+    const refreshVitalsBtn = document.getElementById('refresh-vitals-btn');
+    const patientModal = document.getElementById('patient-modal');
+    const addRoomBtn = document.getElementById('add-room-btn');
+    const roomModal = document.getElementById('room-modal');
+    const closeBtns = document.querySelectorAll('.close-btn');
+    const savePatientBtn = document.getElementById('save-patient-btn');
+    const uploadRoomBtn = document.getElementById('upload-room-btn');
+    const runScenarioBtn = document.getElementById('run-scenario-btn');
+    const roomImageInput = document.getElementById('room-image');
+    const imagePreview = document.getElementById('image-preview');
+
+    // Modal controls
+    editPatientBtn.addEventListener('click', () => {
+        loadPatientDataToForm();
+        patientModal.style.display = 'block';
+    });
+    viewProfileBtn.addEventListener('click', () => {
+        if (window.location.pathname !== '/profile') {
+            window.location.href = '/profile';
+        }
+    });
+    refreshVitalsBtn.addEventListener('click', () => {
+        showNotification('Vitals refreshed successfully!', 'success');
+    });
+    addRoomBtn.addEventListener('click', () => roomModal.style.display = 'block');
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.modal').style.display = 'none';
+        });
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
+    });
+
+    // Image preview
+    roomImageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Room preview">`;
+            }
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    // Load patient data to form
+    function loadPatientDataToForm() {
+        if (patientTwin && (patientTwin.profile || patientTwin.name)) {
+            const profile = patientTwin.profile || patientTwin;
+            document.getElementById('patient-name').value = profile.name || '';
+            document.getElementById('patient-age').value = profile.age || '';
+            document.getElementById('patient-gender').value = profile.gender || '';
+            document.getElementById('mobility').value = profile.mobility || 'normal';
+            document.getElementById('vision').value = profile.vision || 'normal';
+            document.getElementById('cognitive').value = profile.cognitive || 'normal';
+            document.getElementById('medications').value = profile.medications || '';
+            document.getElementById('conditions').value = profile.diseases || profile.conditions || '';
+            document.getElementById('allergies').value = profile.allergies || '';
+            document.getElementById('emergency-contact').value = profile.emergency_contact || '';
+            document.getElementById('fall_history').checked = profile.fall_history || false;
+            document.getElementById('surgery_history').checked = profile.surgery_history || false;
+        }
+    }
+
+    // Save patient profile
+    savePatientBtn.addEventListener('click', async function() {
+        const name = document.getElementById('patient-name').value;
+        const age = parseInt(document.getElementById('patient-age').value);
+        const gender = document.getElementById('patient-gender').value;
+        const conditions = document.getElementById('conditions').value.split(',').map(s => s.trim()).filter(Boolean);
+
+        if (!name || !age || !gender || !document.getElementById('mobility').value ||
+    !document.getElementById('vision').value || !document.getElementById('cognitive').value) {
+            showNotification('Please fill in all required fields', 'error');
+            return;
+        }
+
+        patientTwin = {
+            profile: {
+                name: name,
+                age: age,
+                gender: gender,
+                diseases: conditions.join(', '),
+                mobility: document.getElementById('mobility').value,
+                vision: document.getElementById('vision').value,
+                cognitive: document.getElementById('cognitive').value,
+                medications: document.getElementById('medications').value,
+                allergies: document.getElementById('allergies').value,
+                emergency_contact: document.getElementById('emergency-contact').value,
+                fall_history: document.getElementById('fall_history').checked,
+                surgery_history: document.getElementById('surgery_history').checked,
+            }
+        };
+
+        try {
+            const response = await fetch('/save-profile', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    patientTwin: patientTwin,
+                    houseTwin: houseTwin
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save profile');
+            }
+
+            updatePatientDisplay();
+            patientModal.style.display = 'none';
+            showNotification('Patient profile saved successfully!', 'success');
+        } catch (error) {
+            showNotification('Error saving profile: ' + error.message, 'error');
+        }
+    });
+
+    // Upload room image
+    uploadRoomBtn.addEventListener('click', async function() {
+        const roomName = document.getElementById('room-name').value.trim();
+        const file = roomImageInput.files[0];
+
+        if (!roomName) {
+            showNotification('Please enter a room name', 'error');
+            return;
+        }
+
+        if (!file) {
+            showNotification('Please select an image', 'error');
+            return;
+        }
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('room_name', roomName);
+
+        try {
+            const res = await fetch('/upload-room-image', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            houseTwin[data.room] = data.objects;
+            updateHouseDisplay();
+
+            // Show annotated image with bounding boxes and detected objects
+            if (data.annotated_image_url) {
+                updateAnnotatedImage(data.annotated_image_url, data.annotations);
+            } else if (data.annotated_image) {
+                // fallback for old API
+                const annotatedContainer = document.getElementById('annotated-image-container');
+                annotatedContainer.innerHTML = `
+                    <div class="annotated-image-wrapper">
+                        <h3>${roomName} Analysis</h3>
+                        <img src="${data.annotated_image}" alt="Annotated room image" class="annotated-image">
+                        <div class="detected-objects-list">
+                            <h4>Detected Objects:</h4>
+                            <div class="object-tags">
+                                ${data.objects.map(obj => `<span class="object-tag">${escapeHTML(obj)}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            roomModal.style.display = 'none';
+            showNotification(`Room "${roomName}" analyzed successfully!`, 'success');
+
+            // Reset form
+            document.getElementById('room-form').reset();
+            imagePreview.innerHTML = `
+                <div class="empty-preview">
+                    <i class="fas fa-image"></i>
+                    <p>No image selected</p>
+                </div>
+            `;
+        } catch (err) {
+            showNotification('Error: ' + err.message, 'error');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-upload"></i> Upload & Analyze';
+        }
+    });
+
+    // Run scenario
+    runScenarioBtn.addEventListener('click', async function() {
+        const activity = document.getElementById('activity').value || 'general movement';
+        const timeOfDay = document.getElementById('time-of-day').value || 'day';
+        const events = document.getElementById('events').value.split(',').map(s => s.trim()).filter(Boolean);
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+
+        try {
+            const res = await fetch('/run-scenario', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    patient: patientTwin.profile || patientTwin,
+                    house: houseTwin,
+                    activity: activity,
+                    time_of_day: timeOfDay,
+                    events: events
+                }),
+            });
+
+            const data = await res.json();
+            displayRecommendations(data.recommendations);
+            showNotification('Scenario completed successfully!', 'success');
+        } catch (err) {
+            showNotification('Error running scenario: ' + err.message, 'error');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-play"></i> Run Scenario';
+        }
+    });
+
+    // Helper functions
+    function updatePatientDisplay() {
+        if (!patientTwin || (!patientTwin.profile && Object.keys(patientTwin).length === 0)) return;
+
+        const profile = patientTwin.profile || patientTwin;
+
+        document.getElementById('patient-status').textContent = 'Configured';
+        document.getElementById('patient-status').className = 'status-badge active';
+        document.getElementById('stat-mobility').textContent = profile.mobility || 'normal';
+        document.getElementById('stat-vision').textContent = profile.vision || 'normal';
+        document.getElementById('stat-cognitive').textContent = profile.cognitive || 'normal';
+        document.getElementById('detail-medications').textContent = profile.medications || 'No medications';
+        document.getElementById('detail-falls').textContent = profile.fall_history ? 'History of falls' : 'No fall history';
+        document.getElementById('detail-name').textContent = profile.name || 'No name set';
+        document.getElementById('detail-age').textContent = profile.age ? `${profile.age} years old` : 'No age set';
+        document.getElementById('detail-conditions').textContent = profile.diseases || profile.conditions || 'No conditions';
+
+        if (profile.name) {
+            const avatar = document.getElementById('patient-avatar');
+            const initials = profile.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            avatar.textContent = initials;
+            avatar.className = 'avatar-circle';
+        }
+    }
+
+    function escapeHTML(value) {
+        const node = document.createElement('span'); node.textContent = String(value); return node.innerHTML;
+    }
+    function updateHouseDisplay() {
+        const houseViz = document.getElementById('house-visualization');
+
+        if (!houseTwin || Object.keys(houseTwin).length === 0) {
+            houseViz.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-door-open"></i>
+                    <p>No rooms added yet</p>
+                </div>
+            `;
+            document.getElementById('house-status').textContent = 'Empty';
+            document.getElementById('house-status').className = 'status-badge';
+            return;
+        }
+
+        document.getElementById('house-status').textContent = `${Object.keys(houseTwin).length} rooms`;
+        document.getElementById('house-status').className = 'status-badge active';
+
+        houseViz.innerHTML = `
+            <div class="house-grid">
+                ${Object.entries(houseTwin).map(([room, objects]) => `
+                    <div class="room-card">
+                        <div class="room-header">
+                            <i class="fas fa-door-closed"></i>
+                            <h3>${escapeHTML(room)}</h3>
+                        </div>
+                        <div class="room-objects">
+                            ${objects.map(obj => `
+                                <span class="object-tag">${escapeHTML(obj)}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // Overlay bounding boxes for YOLO annotations
+    function updateAnnotatedImage(imageUrl, detections) {
+    const container = document.getElementById('annotated-image-container');
+    container.innerHTML = `
+        <div style="position: relative; display: inline-block;">
+            <img id="annotated-img" src="${imageUrl}" alt="Annotated room image" style="width: 100%; height: auto; display: block;">
+            ${detections && detections.length ? detections.map(det => {
+                const [x1, y1, x2, y2] = det.box;
+                return `
+                    <div class="annotation" style="
+                        left: ${x1}px;
+                        top: ${y1}px;
+                        width: ${x2 - x1}px;
+                        height: ${y2 - y1}px;
+                    ">
+                        <div class="annotation-label">${escapeHTML(det.name)}</div>
+                    </div>
+                `;
+            }).join('') : ''}
+        </div>
+    `;
+}
+
+    function displayRecommendations(text) {
+        const recommendationsEl = document.getElementById('recommendations');
+        recommendationsEl.textContent = text; recommendationsEl.style.whiteSpace = 'pre-wrap';
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${escapeHTML(message)}</span>
+        `;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => notification.remove(), 500);
+        }, 3000);
+    }
+
+    // Click handler for annotated images (modal view)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('annotated-image')) {
+            const imgSrc = e.target.src;
+            const modal = document.createElement('div');
+            modal.className = 'image-modal';
+            modal.innerHTML = `
+                <div class="image-modal-content">
+                    <span class="close-btn">&times;</span>
+                    <img src="${imgSrc}" alt="Full size annotated image">
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            modal.querySelector('.close-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+        }
+    });
+
+    // Initialize the page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        updatePatientDisplay();
+        updateHouseDisplay();
+
+        // Show initial status
+        document.getElementById('patient-status').textContent =
+            (patientTwin && (patientTwin.profile || patientTwin.name)) ? 'Configured' : 'Not Configured';
+    });
+
+</script>
+
+{% endblock %}

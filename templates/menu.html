@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% block title %}Your day — HayatCare{% endblock %}{% block content %}<section class="hc-hero"><div class="hc-kicker">Your daily companion</div><h1>A good day starts<br>with a little care.</h1><p>Welcome, {{ username }}. Give your mind a moment, check your routine, or connect with your care circle.</p><a class="hc-button" href="/brain-training">Start a brain activity →</a></section><div class="hc-grid">{% for endpoint,icon,title,description in [
+('cognitive.hub','✦','Keep your mind active','Find your next challenge with memory, attention, and reasoning activities.'),
+('medications.page','◷','Your medication routine','See what is due, set reminders, and keep your daily records together.'),
+('cognitive.progress','↗','See your progress','Look back at your activity results and see how you are doing over time.'),
+('phone.monitor','⌁','Phone fall monitoring','Connect your phone’s motion sensors and choose caregiver alerts.'),
+('eldora','☀','Talk to Eldora','Ask a question or get support with your everyday care routine.'),
+('reminders','✓','Make time for you','Set a reminder for an appointment, a glass of water, or another daily task.'),
+('profile','♡','Your care profile','Keep your details, care preferences, and caregiver contact up to date.'),
+('house','⌂','A safer home','Review room photos and explore ways to make your home easier to navigate.'),
+('fall_history','☷','Your monitoring history','Review recorded events and the status of your caregiver alerts.'),
+('dashboard','◉','Explore health readings','Explore example health readings and see how they change over time.'),
+('heart_risk','＋','Heart health insights','Enter your measurements and health history to explore your results.')
+] %}<a class="hc-card" href="{{ url_for(endpoint) }}"><span class="hc-icon" aria-hidden="true">{{ icon }}</span><h2>{{ title }}</h2><p>{{ description }}</p><span class="hc-open">Explore →</span></a>{% endfor %}</div>{% endblock %}

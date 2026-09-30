@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Cognitive game results — HayatCare{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+  <h1 class="text-3xl font-bold">Cognitive game results</h1>
+  <p class="p-4 bg-amber-50 rounded">This is a game-performance demonstration trained on synthetic data. It cannot diagnose or measure your probability of Alzheimer's disease.</p>
+  {% if no_results %}<p>No results in this assessment yet. <a class="text-blue-700 underline" href="{{ url_for('start_assessment') }}">Start the games</a>.</p>{% endif %}
+  {% if error %}<p role="alert" class="p-4 bg-red-50">{{ error }} Your recorded scores remain available below.</p>{% endif %}
+  {% if prediction %}<div class="p-5 border rounded"><h2 class="text-xl font-semibold">Demonstration category: {{ prediction.risk_level }}</h2><p>Model class confidence: {{ (prediction.probability*100)|round(1) }}%. This is not a clinical disease probability.</p></div>{% endif %}
+  {% if game_metrics %}
+  <div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th>Game</th><th>Points</th><th>Accuracy</th><th>Attempts</th><th>Time</th></tr></thead><tbody>
+  {% for game in game_metrics %}<tr class="border-t"><td class="py-3">{{ game.name }}</td><td>{{ game.avg_score|round(1) }}</td><td>{{ (game.accuracy*100)|round(1) }}%</td><td>{{ game.attempts }}</td><td>{{ game.avg_time|round(1) }} s</td></tr>{% endfor %}
+  </tbody></table></div>{% endif %}
+  <a href="{{ url_for('menu') }}" class="text-blue-700 underline">Return to menu</a>
+</div>
+{% endblock %}

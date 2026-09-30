@@ -1,0 +1,4 @@
+# Website, phone sensors, reminders, and core model training.
+-r requirements-core.txt
+# Room photo analysis: pip install -r requirements-vision.txt
+# Legacy H5 model experiments additionally require TensorFlow; phone detection does not.

@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% include 'security.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shapes Memory Game - Cognitive Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 5px 10px;
+            min-width: 80px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2980b9;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        
+        .shape {
+            margin: 10px;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .shape:hover {
+            transform: scale(1.1);
+        }
+        
+        .circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+        }
+        
+        .square {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 60px solid;
+        }
+        
+        .star {
+            width: 60px;
+            height: 60px;
+            clip-path: polygon(
+                50% 0%, 61% 35%, 98% 35%, 68% 57%, 
+                79% 91%, 50% 70%, 21% 91%, 32% 57%, 
+                2% 35%, 39% 35%
+            );
+        }
+        
+        .hexagon {
+            width: 60px;
+            height: 60px;
+            clip-path: polygon(
+                25% 0%, 75% 0%, 100% 50%, 
+                75% 100%, 25% 100%, 0% 50%
+            );
+        }
+        
+        .diamond {
+            width: 60px;
+            height: 60px;
+            transform: rotate(45deg);
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-next {
+            background-color: #2ecc71;
+        }
+        
+        .btn-next:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-reset {
+            background-color: #e74c3c;
+        }
+        
+        .btn-reset:hover {
+            background-color: #c0392b;
+        }
+        
+        .sequence-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .shape-option {
+            margin: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .shape-option:hover {
+            opacity: 0.8;
+        }
+        
+        .selected-shape {
+            box-shadow: 0 0 0 3px #3498db;
+            border-radius: 3px;
+        }
+        
+        .shape-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 5px 10px;
+            text-align: center;
+        }
+        
+        .shape-index {
+            position: absolute;
+            top: -15px;
+            right: -5px;
+            background-color: #3498db;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .result-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .result-panel {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            width: 45%;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .assessment {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .instructions {
+            background-color: #fffde7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #ffd600;
+        }
+        
+        .empty-slot {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #999;
+            background-color: #f9f9f9;
+        }
+        
+        .shape-comparison {
+            display: inline-block;
+            margin: 5px;
+            position: relative;
+        }
+        
+        .correct-indicator {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .correct {
+            background-color: #2ecc71;
+        }
+        
+        .incorrect {
+            background-color: #e74c3c;
+        }
+        
+        @media (max-width: 600px) {
+            .stats-bar {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stat-box {
+                margin: 5px 0;
+            }
+            
+            .result-container {
+                flex-direction: column;
+            }
+            
+            .result-panel {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Shapes Memory Test</h1>
+        
+        <div class="stats-bar">
+            <div class="stat-box">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="level">1</div>
+                <div class="stat-label">Level</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="round">1/5</div>
+                <div class="stat-label">Round</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="attempts">0</div>
+                <div class="stat-label">Attempts</div>
+            </div>
+        </div>
+        
+        <div id="intro-screen">
+            <p>This game tests your visual memory by having you remember sequences of colored shapes.</p>
+            <p>You'll be shown shapes briefly, then asked to recall them in order.</p>
+            
+            <div class="instructions">
+                <h3>How to Play:</h3>
+                <ol>
+                    <li>Memorize the sequence of shapes shown</li>
+                    <li>After they disappear, recreate the sequence in the same order</li>
+                    <li>Get to higher levels by remembering longer sequences</li>
+                </ol>
+                <p><strong>Note:</strong> This is not a medical diagnosis tool, but can help identify potential memory issues.</p>
+            </div>
+            
+            <button class="btn" id="start-btn">Start Test</button>
+        </div>
+        
+        <div id="memorize-screen" class="hidden">
+            <h2>Memorize these shapes</h2>
+            <div class="timer" id="memorize-timer">5</div>
+            <div class="sequence-container" id="memorize-sequence"></div>
+        </div>
+        
+        <div id="recall-screen" class="hidden">
+            <h2>Recreate the sequence</h2>
+            <p>Selected: <span id="selected-count">0</span>/<span id="total-count">0</span></p>
+            <div class="sequence-container" id="recall-sequence"></div>
+            
+            <h3>Choose shapes:</h3>
+            <div class="sequence-container" id="shape-options"></div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-reset" id="clear-btn">Clear Selection</button>
+                <button class="btn btn-next" id="submit-btn">Submit Answer</button>
+            </div>
+        </div>
+        
+        <div id="results-screen" class="hidden">
+            <h2>Round Results</h2>
+            <div class="result-container">
+                <div class="result-panel">
+                    <div class="result-title">Your Sequence</div>
+                    <div id="user-sequence-results"></div>
+                </div>
+                <div class="result-panel">
+                    <div class="result-title">Correct Sequence</div>
+                    <div id="correct-sequence-results"></div>
+                </div>
+            </div>
+            
+            <div class="assessment">
+                <h3>Round Score: <span id="round-score">0</span>%</h3>
+                <p>Total Score: <span id="total-score">0</span>%</p>
+                <p>Attempts: <span id="result-attempts">0</span></p>
+            </div>
+            
+            <button class="btn btn-next" id="next-round-btn">Next Round</button>
+        </div>
+        
+        <div id="gameover-screen" class="hidden">
+            <h2>Test Complete!</h2>
+            
+            <div class="assessment">
+                <h3>Final Score: <span id="final-score">0</span>%</h3>
+                <p>Level Reached: <span id="final-level">1</span></p>
+                <p>Total Attempts: <span id="final-attempts">0</span></p>
+                
+                <div id="memory-assessment">
+                    <h4>Memory Assessment:</h4>
+                    <p id="assessment-text">Your results will appear here</p>
+                </div>
+            </div>
+            
+            <button class="btn" id="play-again-btn">Play Again</button>
+            <a id="next-game-btn"
+               href="{{ url_for('memory_numbers') }}"
+               class="mt-6 inline-block bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-indigo-700 transition hidden">
+              Next Game <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+            
+            <div class="instructions">
+                <h3>About This Test</h3>
+                <p>This game evaluates:</p>
+                <ul>
+                    <li>Visual working memory</li>
+                    <li>Pattern recognition</li>
+                    <li>Attention to detail</li>
+                </ul>
+                <p>Regular memory exercises may help maintain cognitive function.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const shapes = ["circle", "square", "triangle", "star", "hexagon", "diamond"];
+        const colors = ["red", "blue", "green", "purple", "orange", "teal"];
+        
+        // Game state
+        let gameState = {
+            phase: "intro", // intro, memorize, recall, results, gameover
+            level: 1,
+            sequence: [],
+            userSequence: [],
+            timer: 0,
+            score: 0,
+            totalScore: 0,
+            round: 1,
+            maxRounds: 5,
+            attempts: 0,
+            memorizationTime: 5,
+            timerInterval: null,
+            gameDuration: 0,
+            startTime: null
+        };
+        
+        // DOM elements
+        const elements = {
+            introScreen: document.getElementById("intro-screen"),
+            memorizeScreen: document.getElementById("memorize-screen"),
+            recallScreen: document.getElementById("recall-screen"),
+            resultsScreen: document.getElementById("results-screen"),
+            gameoverScreen: document.getElementById("gameover-screen"),
+            
+            memorizeSequence: document.getElementById("memorize-sequence"),
+            recallSequence: document.getElementById("recall-sequence"),
+            shapeOptions: document.getElementById("shape-options"),
+            
+            scoreDisplay: document.getElementById("score"),
+            levelDisplay: document.getElementById("level"),
+            roundDisplay: document.getElementById("round"),
+            attemptsDisplay: document.getElementById("attempts"),
+            
+            memorizeTimer: document.getElementById("memorize-timer"),
+            selectedCount: document.getElementById("selected-count"),
+            totalCount: document.getElementById("total-count"),
+            
+            userSequenceResults: document.getElementById("user-sequence-results"),
+            correctSequenceResults: document.getElementById("correct-sequence-results"),
+            roundScore: document.getElementById("round-score"),
+            totalScore: document.getElementById("total-score"),
+            resultAttempts: document.getElementById("result-attempts"),
+            
+            finalScore: document.getElementById("final-score"),
+            finalLevel: document.getElementById("final-level"),
+            finalAttempts: document.getElementById("final-attempts"),
+            assessmentText: document.getElementById("assessment-text"),
+            
+            startBtn: document.getElementById("start-btn"),
+            clearBtn: document.getElementById("clear-btn"),
+            submitBtn: document.getElementById("submit-btn"),
+            nextRoundBtn: document.getElementById("next-round-btn"),
+            playAgainBtn: document.getElementById("play-again-btn"),
+            nextGameBtn: document.getElementById("next-game-btn")
+        };
+        
+        // Initialize game
+        function initGame() {
+            updateStatsDisplay();
+            setupEventListeners();
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            elements.startBtn.addEventListener("click", startGame);
+            elements.clearBtn.addEventListener("click", clearSelection);
+            elements.submitBtn.addEventListener("click", submitAnswer);
+            elements.nextRoundBtn.addEventListener("click", nextRound);
+            elements.playAgainBtn.addEventListener("click", resetGame);
+            elements.nextGameBtn.addEventListener("click", submitFinalResults);
+        }
+        
+        // Start the game
+        function startGame() {
+            gameState.phase = "memorize";
+            gameState.level = 1;
+            gameState.score = 0;
+            gameState.totalScore = 0;
+            gameState.round = 1;
+            gameState.attempts = 0;
+            gameState.startTime = Date.now();
+            
+            generateSequence();
+            showMemorizeScreen();
+        }
+        
+        // Generate a new sequence
+        function generateSequence() {
+            gameState.sequence = [];
+            const sequenceLength = gameState.level + 2;
+            
+            for (let i = 0; i < sequenceLength; i++) {
+                const shapeIndex = Math.floor(Math.random() * shapes.length);
+                const colorIndex = Math.floor(Math.random() * colors.length);
+                gameState.sequence.push({
+                    shape: shapes[shapeIndex],
+                    color: colors[colorIndex]
+                });
+            }
+            
+            gameState.userSequence = [];
+            gameState.memorizationTime = Math.max(3, 7 - Math.floor(gameState.level / 2));
+        }
+        
+        // Show memorize screen
+        function showMemorizeScreen() {
+            updateStatsDisplay();
+            
+            // Clear previous sequence
+            elements.memorizeSequence.innerHTML = "";
+            
+            // Display the sequence
+            gameState.sequence.forEach((item, index) => {
+                const shapeElement = createShapeElement(item.shape, item.color);
+                const wrapper = document.createElement("div");
+                wrapper.className = "shape-wrapper";
+                
+                const indexElement = document.createElement("div");
+                indexElement.className = "shape-index";
+                indexElement.textContent = index + 1;
+                
+                wrapper.appendChild(shapeElement);
+                wrapper.appendChild(indexElement);
+                elements.memorizeSequence.appendChild(wrapper);
+            });
+            
+            // Start timer
+            gameState.timer = gameState.memorizationTime;
+            elements.memorizeTimer.textContent = gameState.timer;
+            
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                elements.memorizeTimer.textContent = gameState.timer;
+                
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    showRecallScreen();
+                }
+            }, 1000);
+            
+            // Switch screens
+            elements.introScreen.classList.add("hidden");
+            elements.resultsScreen.classList.add("hidden");
+            elements.memorizeScreen.classList.remove("hidden");
+        }
+        
+        // Show recall screen
+        function showRecallScreen() {
+            gameState.phase = "recall";
+            
+            // Update counters
+            elements.selectedCount.textContent = "0";
+            elements.totalCount.textContent = gameState.sequence.length;
+            
+            // Clear recall sequence display
+            elements.recallSequence.innerHTML = "";
+            
+            // Create empty slots for the sequence
+            for (let i = 0; i < gameState.sequence.length; i++) {
+                const emptySlot = document.createElement("div");
+                emptySlot.className = "empty-slot";
+                emptySlot.innerHTML = "?";
+                
+                const wrapper = document.createElement("div");
+                wrapper.className = "shape-wrapper";
+                
+                const indexElement = document.createElement("div");
+                indexElement.className = "shape-index";
+                indexElement.textContent = i + 1;
+                
+                wrapper.appendChild(emptySlot);
+                wrapper.appendChild(indexElement);
+                elements.recallSequence.appendChild(wrapper);
+            }
+            
+            // Create shape options
+            elements.shapeOptions.innerHTML = "";
+            shapes.forEach(shape => {
+                colors.forEach(color => {
+                    const shapeElement = createShapeElement(shape, color);
+                    shapeElement.classList.add("shape-option");
+                    shapeElement.dataset.shape = shape;
+                    shapeElement.dataset.color = color;
+                    
+                    // Add click event
+                    shapeElement.addEventListener("click", () => {
+                        if (gameState.userSequence.length < gameState.sequence.length) {
+                            selectShape(shape, color, shapeElement);
+                        }
+                    });
+                    
+                    elements.shapeOptions.appendChild(shapeElement);
+                });
+            });
+            
+            // Switch screens
+            elements.memorizeScreen.classList.add("hidden");
+            elements.recallScreen.classList.remove("hidden");
+        }
+        
+        // Handle shape selection during recall
+        function selectShape(shape, color, element) {
+            if (gameState.phase !== "recall") return;
+            
+            // Add to user sequence
+            gameState.userSequence.push({ shape, color });
+            gameState.attempts++;
+            updateStatsDisplay();
+            
+            // Highlight the selected shape
+            element.classList.add("selected-shape");
+            
+            // Update recall display
+            updateRecallDisplay();
+            
+            elements.selectedCount.textContent = gameState.userSequence.length;
+        }
+        
+        // Update the recall display with current selections
+        function updateRecallDisplay() {
+            elements.recallSequence.innerHTML = "";
+            
+            for (let i = 0; i < gameState.sequence.length; i++) {
+                const wrapper = document.createElement("div");
+                wrapper.className = "shape-wrapper";
+                
+                const indexElement = document.createElement("div");
+                indexElement.className = "shape-index";
+                indexElement.textContent = i + 1;
+                
+                if (i < gameState.userSequence.length) {
+                    // Show selected shape
+                    const item = gameState.userSequence[i];
+                    const shapeElement = createShapeElement(item.shape, item.color);
+                    wrapper.appendChild(shapeElement);
+                } else {
+                    // Show empty slot
+                    const emptySlot = document.createElement("div");
+                    emptySlot.className = "empty-slot";
+                    emptySlot.innerHTML = "?";
+                    wrapper.appendChild(emptySlot);
+                }
+                
+                wrapper.appendChild(indexElement);
+                elements.recallSequence.appendChild(wrapper);
+            }
+        }
+        
+        // Clear user selection
+        function clearSelection() {
+            gameState.userSequence = [];
+            updateRecallDisplay();
+            elements.selectedCount.textContent = "0";
+            
+            // Remove highlighting from all shape options
+            const shapeOptions = document.querySelectorAll(".shape-option");
+            shapeOptions.forEach(option => {
+                option.classList.remove("selected-shape");
+            });
+        }
+        
+        // Submit the user's answer
+        function submitAnswer() {
+            if (gameState.userSequence.length < gameState.sequence.length) {
+                alert("Please select all shapes in the sequence before submitting.");
+                return;
+            }
+            
+            showResults();
+        }
+        
+        // Show results screen
+        function showResults() {
+            gameState.phase = "results";
+            
+            // Calculate score for this round
+            let correct = 0;
+            for (let i = 0; i < gameState.sequence.length; i++) {
+                if (gameState.userSequence[i] && 
+                    gameState.userSequence[i].shape === gameState.sequence[i].shape && 
+                    gameState.userSequence[i].color === gameState.sequence[i].color) {
+                    correct++;
+                }
+            }
+            
+            const roundScore = Math.round((correct / gameState.sequence.length) * 100);
+            gameState.totalScore += roundScore;
+            
+            // Display results
+            elements.userSequenceResults.innerHTML = "";
+            gameState.userSequence.forEach((item, index) => {
+                const isCorrect = (item.shape === gameState.sequence[index].shape && 
+                                  item.color === gameState.sequence[index].color);
+                
+                const shapeElement = createShapeElement(item.shape, item.color);
+                const wrapper = document.createElement("div");
+                wrapper.className = "shape-comparison";
+                
+                const indicator = document.createElement("div");
+                indicator.className = `correct-indicator ${isCorrect ? 'correct' : 'incorrect'}`;
+                indicator.textContent = isCorrect ? "✓" : "✗";
+                
+                wrapper.appendChild(shapeElement);
+                wrapper.appendChild(indicator);
+                elements.userSequenceResults.appendChild(wrapper);
+            });
+            
+            elements.correctSequenceResults.innerHTML = "";
+            gameState.sequence.forEach((item) => {
+                const shapeElement = createShapeElement(item.shape, item.color);
+                const wrapper = document.createElement("div");
+                wrapper.className = "shape-comparison";
+                elements.correctSequenceResults.appendChild(wrapper);
+                wrapper.appendChild(shapeElement);
+            });
+            
+            elements.roundScore.textContent = roundScore;
+            elements.totalScore.textContent = (gameState.totalScore / gameState.round).toFixed(1);
+            elements.resultAttempts.textContent = gameState.attempts;
+            
+            // Switch screens
+            elements.recallScreen.classList.add("hidden");
+            elements.resultsScreen.classList.remove("hidden");
+        }
+        
+        // Move to next round
+        function nextRound() {
+            gameState.round++;
+            
+            if (gameState.round <= gameState.maxRounds) {
+                // Increase level if perfect score in previous round
+                const roundScore = parseInt(elements.roundScore.textContent);
+                if (roundScore >= 90) {
+                    gameState.level++;
+                }
+                
+                generateSequence();
+                showMemorizeScreen();
+            } else {
+                showGameOver();
+            }
+        }
+        
+        // Show game over screen
+        function showGameOver() {
+            gameState.phase = "gameover";
+            gameState.gameDuration = (Date.now() - gameState.startTime) / 1000;
+            
+            const averageScore = gameState.totalScore / gameState.maxRounds;
+            
+            elements.finalScore.textContent = averageScore.toFixed(1);
+            elements.finalLevel.textContent = gameState.level;
+            elements.finalAttempts.textContent = gameState.attempts;
+            
+            // Provide assessment based on score and level
+            let assessment = "";
+            
+            if (gameState.level >= 4) {
+                if (averageScore >= 90) {
+                    assessment = "Excellent memory! Your visual recall ability is exceptional. You show strong pattern recognition skills and can handle complex visual sequences.";
+                } else if (averageScore >= 70) {
+                    assessment = "Very good memory! You've demonstrated strong recall abilities and reached an advanced level. Continue practicing to maintain these skills.";
+                } else {
+                    assessment = "Good memory. You've reached an advanced level, though accuracy could be improved. Regular practice will help enhance your recall precision.";
+                }
+            } else if (gameState.level >= 2) {
+                if (averageScore >= 90) {
+                    assessment = "Good memory! You show solid recall skills. With more practice, you could improve your ability to handle longer sequences.";
+                } else if (averageScore >= 70) {
+                    assessment = "Average memory. You have reasonable recall abilities but might benefit from memory techniques to improve accuracy and handle more complex patterns.";
+                } else {
+                    assessment = "Your recall ability could use some development. Try focusing on one element at a time and using association techniques to improve memory.";
+                }
+            } else {
+                if (averageScore >= 70) {
+                    assessment = "Your memory shows potential but needs regular practice. Try breaking sequences into smaller chunks to improve recall.";
+                } else {
+                    assessment = "Your visual memory could benefit from regular exercises. Try simple memory games daily and gradually increase difficulty as you improve.";
+                }
+            }
+            
+            elements.assessmentText.textContent = assessment;
+            
+            // Switch screens
+            elements.resultsScreen.classList.add("hidden");
+            elements.gameoverScreen.classList.remove("hidden");
+        }
+        
+        // Reset the game
+        function resetGame() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            gameState.phase = "intro";
+            gameState.level = 1;
+            gameState.score = 0;
+            gameState.totalScore = 0;
+            gameState.round = 1;
+            gameState.attempts = 0;
+            
+            updateStatsDisplay();
+            
+            elements.gameoverScreen.classList.add("hidden");
+            elements.introScreen.classList.remove("hidden");
+        }
+        
+        // Submit final results to server
+        async function submitFinalResults() {
+            const averageScore = gameState.totalScore / gameState.maxRounds;
+            const accuracy = averageScore / 100;
+            
+            try {
+                const response = await fetch('/games/drag-shapes/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'score': Math.round(averageScore),
+                        'attempts': gameState.attempts,
+                        'duration': gameState.gameDuration,
+                        'accuracy': accuracy,
+                        'level': gameState.level
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success && data.next_game) {
+                    window.location.href = data.next_game;
+                } else {
+                    window.location.href = '/summary';
+                }
+            } catch (error) {
+                console.error('Error submitting results:', error);
+                window.location.href = '/summary';
+            }
+        }
+        
+        // Create a shape element
+        function createShapeElement(shape, color) {
+            const element = document.createElement("div");
+            element.className = `shape ${shape}`;
+            element.style.backgroundColor = color;
+            return element;
+        }
+        
+        // Update stats display
+        function updateStatsDisplay() {
+            elements.scoreDisplay.textContent = gameState.round > 1 ? 
+                (gameState.totalScore / (gameState.round - 1)).toFixed(1) : "0";
+            elements.levelDisplay.textContent = gameState.level;
+            elements.roundDisplay.textContent = `${gameState.round}/${gameState.maxRounds}`;
+            elements.attemptsDisplay.textContent = gameState.attempts;
+        }
+        
+        // Initialize the game when page loads
+        window.addEventListener("DOMContentLoaded", initGame);
+        document.getElementById('next-game-btn').classList.remove('hidden');
+    </script>
+</body>
+</html>

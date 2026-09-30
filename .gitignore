@@ -1,0 +1,43 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+*service-account*.json
+# Environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.idea/
+.vscode/
+# Private data and generated artifacts
+data/
+test_data/
+**/uploads/
+*.csv
+*.sqlite*
+*.db
+*.db-*
+*.log
+*.ipynb
+*.zip
+work/
+0.8.5
+# Model weights and fitted preprocessing artifacts
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.onnx
+*.keras
+*.tflite
+*.safetensors
+*.metadata.json

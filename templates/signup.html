@@ -1,0 +1,589 @@
+{% extends "base.html" %}
+{% block title %}HayatCare - Sign Up / Login{% endblock %}
+{% block page_css %}
+body, html {
+    background: #fff !important;
+}
+.form-container {
+    background: #fff !important;
+}
+.link {
+    color: #2563eb;
+    text-decoration: underline;
+}
+.signup-flex {
+    display: flex;
+    flex-direction: row;
+    background: rgb(13, 18, 32);
+    gap: 0;
+    align-items: stretch;
+    justify-content: center;
+    height: 700px;
+    min-height: 600px;
+    max-height: 90vh;
+    padding-bottom: 32px; /* Add space below the form and image */
+}
+.signup-card {
+    background: transparent;
+    border-radius: 18px 0 0 18px;
+    box-shadow: 0 8px 32px rgba(30, 40, 60, 0.18);
+    max-width: 420px;
+    width: 100%;
+    padding: 0 0 32px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: stretch;
+    height: 95%; /* Slightly less than 100% to show margin */
+    max-height: 650px; /* Adjust if needed */
+    overflow-y: auto;
+    margin-bottom: 24px; /* Add margin under the form */
+}
+.form-side {
+    width: 100%;
+    padding: 32px 32px 0 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.form-title {
+    color: #232733;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+.form-subtitle {
+    color: #4b5563;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+.form-label {
+    color: #232733;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    width: 100%;
+}
+.form-label.required:after {
+    content: " *";
+    color: #f87171;
+}
+.form-input, .form-select {
+    background: #fff;
+    color: #232733;
+    border: 1px solid #e3f2fd;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 1rem;
+    position: relative;
+}
+.form-input:focus, .form-select:focus {
+    border-color: #1e88e5;
+    outline: none;
+    background: #f5f9ff;
+}
+.form-btn {
+    background: #1e88e5;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 32px;
+    margin: 16px auto 0 auto;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: block;
+    width: auto; /* Make button fit its content */
+}
+.form-btn:hover {
+    background: #1565c0;
+}
+.form-link {
+    color: #90caf9;
+    text-decoration: underline;
+    margin-left: 4px;
+}
+.error-message {
+    background: #ffeaea;
+    color: #d32f2f;
+    border: 1px solid #ffcdd2;
+    border-radius: 5px;
+    padding: 10px 14px;
+    margin-bottom: 1rem;
+    font-size: 0.98rem;
+    width: 100%;
+    text-align: center;
+    display: none;
+}
+.field-error {
+    color: #f87171;
+    font-size: 0.8rem;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+    display: none;
+}
+.text-gray-600 {
+    color: #4b5563 !important;
+}
+.signup-img-side {
+    background: rgb(13, 18, 32); /* Match background with .signup-flex */
+    border-radius: 0 18px 18px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 320px;
+    max-width: 420px;
+    width: 100%;
+    overflow: hidden;
+    padding: 0;
+    height: 100%;
+}
+.signup-img-side img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: transparent;
+    border-radius: 0 18px 18px 0;
+}
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 38px;
+    cursor: pointer;
+    color: #6b7280;
+    z-index: 10;
+}
+.form-checkbox {
+    margin-right: 8px;
+    width: auto;
+    display: inline-block;
+}
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+.checkbox-wrapper label {
+    margin-bottom: 0;
+}
+.border-red-400 {
+    border-color: #f87171 !important;
+}
+.progress-container {
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+.progress-bar {
+    height: 6px;
+    background-color: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress {
+    height: 100%;
+    background-color: #1e88e5;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+@media (max-width: 900px) {
+    .signup-flex {
+        flex-direction: column;
+        align-items: center;
+    }
+    .signup-card {
+        border-radius: 18px 18px 0 0;
+        max-width: 100vw;
+    }
+    .signup-img-side {
+        border-radius: 0 0 18px 18px;
+        min-width: 0;
+        max-width: 100vw;
+        height: 220px;
+        padding: 0;
+    }
+    .signup-img-side img {
+        border-radius: 0 0 18px 18px;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center form-container font-sans">
+    <div class="signup-flex w-full max-w-4xl rounded-2xl shadow-xl overflow-hidden">
+        <!-- Sign Up / Login Forms -->
+        <div class="signup-card">
+            <div class="form-side">
+                <div id="form-header" class="mb-6 w-full">
+                    <h2 id="form-title" class="form-title">Sign Up To HayatCare</h2>
+                    <p class="form-subtitle">Create your HayatCare account</p>
+                </div>
+                
+                <!-- Progress Indicator -->
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress" id="form-progress"></div>
+                    </div>
+                    <div class="progress-steps">
+                        <span>1. Account</span>
+                        <span>2. Health</span>
+                        <span>3. Complete</span>
+                    </div>
+                </div>
+                
+                <!-- Form -->
+                <form id="auth-form" action="{{ url_for('signup') }}" method="POST" class="space-y-6 w-full" novalidate>
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="role" value="patient">
+                    
+                    <!-- Account Information Section -->
+                    <div class="form-section" id="account-section" style="display:block;">
+                        <div>
+                            <label for="name" class="form-label required">Full Name</label>
+                            <input type="text" id="name" name="name" required class="form-input" />
+                            <div class="field-error" id="name-error"></div>
+                        </div>
+                        <div>
+                            <label for="username" class="form-label required">Username</label>
+                            <input type="text" id="username" name="username" required class="form-input" />
+                            <div class="field-error" id="username-error"></div>
+                        </div>
+                        <div class="input-wrapper">
+                            <label for="password" class="form-label required">Password</label>
+                            <input type="password" id="password" name="password" required class="form-input" minlength="8" />
+                            <i class="fas fa-eye password-toggle" onclick="togglePassword('password')"></i>
+                            <div class="field-error" id="password-error"></div>
+                        </div>
+                        <div class="input-wrapper">
+                            <label for="confirm_password" class="form-label required">Confirm Password</label>
+                            <input type="password" id="confirm_password" name="confirm_password" required class="form-input" />
+                            <i class="fas fa-eye password-toggle" onclick="togglePassword('confirm_password')"></i>
+                            <div class="field-error" id="confirm-password-error"></div>
+                        </div>
+                        <div>
+                            <label for="gender" class="form-label required">Gender</label>
+                            <select name="gender" id="gender" required class="form-select">
+                                <option value="">Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="field-error" id="gender-error"></div>
+                        </div>
+                        <div>
+                            <label for="weight" class="form-label required">Weight (kg)</label>
+                            <input type="number" name="weight" id="weight" required class="form-input" />
+                            <div class="field-error" id="weight-error"></div>
+                        </div>
+                        <div>
+                            <label for="height" class="form-label required">Height (cm)</label>
+                            <input type="number" name="height" id="height" required class="form-input" />
+                            <div class="field-error" id="height-error"></div>
+                        </div>
+                        <button type="button" class="form-btn next-btn" onclick="nextSection('account-section', 'health-section')">Continue</button>
+                    </div>
+                    
+                    <!-- Health Information Section -->
+                    <div class="form-section" id="health-section" style="display:none;">
+                        <div>
+                            <label for="age" class="form-label required">Age</label>
+                            <input type="number" id="age" name="age" min="60" max="120" required class="form-input" />
+                            <div class="field-error" id="age-error"></div>
+                        </div>
+                        <div>
+                            <label for="mobility" class="form-label required">Mobility</label>
+                            <select id="mobility" name="mobility" required class="form-select">
+                                <option value="">Select mobility status</option>
+                                <option value="normal">Normal</option>
+                                <option value="limited">Limited</option>
+                                <option value="wheelchair">Wheelchair</option>
+                            </select>
+                            <div class="field-error" id="mobility-error"></div>
+                        </div>
+                        <div>
+                            <label for="vision" class="form-label required">Vision</label>
+                            <select id="vision" name="vision" required class="form-select">
+                                <option value="">Select vision status</option>
+                                <option value="normal">Normal</option>
+                                <option value="impaired">Impaired</option>
+                                <option value="legally_blind">Legally Blind</option>
+                            </select>
+                            <div class="field-error" id="vision-error"></div>
+                        </div>
+                        <div>
+                            <label for="cognitive" class="form-label required">Cognitive State</label>
+                            <select id="cognitive" name="cognitive" required class="form-select">
+                                <option value="">Select cognitive state</option>
+                                <option value="normal">Normal</option>
+                                <option value="mild_decline">Mild Decline</option>
+                                <option value="moderate_decline">Moderate Decline</option>
+                                <option value="severe_decline">Severe Decline</option>
+                            </select>
+                            <div class="field-error" id="cognitive-error"></div>
+                        </div>
+                        <div>
+                            <label for="medications" class="form-label">Medications (comma separated)</label>
+                            <input type="text" id="medications" name="medications" placeholder="e.g. blood thinner, sleep aid" class="form-input" />
+                            <div class="text-xs text-gray-600 mb-2">Start typing to see suggestions</div>
+                            <div id="medication-suggestions" class="hidden"></div>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="fall_history" name="fall_history" value="true" class="form-checkbox">
+                            <label for="fall_history" class="form-label" style="color:#232733;font-weight:400;">History of falls</label>
+                        </div>
+                        <div class="flex gap-4">
+                            <button type="button" class="form-btn bg-gray-500 hover:bg-gray-600" onclick="prevSection('health-section', 'account-section')">Back</button>
+                            <button type="button" class="form-btn next-btn" onclick="nextSection('health-section', 'emergency-section')">Continue</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Emergency Information Section -->
+                    <div class="form-section" id="emergency-section" style="display:none;">
+                        <div>
+                            <label for="emergency_contact" class="form-label required">Emergency Contact</label>
+                            <input type="tel" name="emergency_contact" id="emergency_contact"
+                                placeholder="+1234567890"
+                                pattern="^\+\d{10,15}$"
+                                required
+                                class="form-input" />
+                            <div class="field-error" id="emergency-contact-error"></div>
+                            <span class="text-xs text-gray-600 mb-2">Format: +1234567890</span>
+                        </div>
+                        <div>
+                            <label for="emergency_contact2" class="form-label">Secondary Emergency Contact</label>
+                            <input type="tel" name="emergency_contact2" id="emergency_contact2"
+                                placeholder="+1234567890"
+                                pattern="^\+\d{10,15}$"
+                                class="form-input" />
+                            <span class="text-xs text-gray-600 mb-2">Optional</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <button type="button" class="form-btn bg-gray-500 hover:bg-gray-600" onclick="prevSection('emergency-section', 'health-section')">Back</button>
+                            <button type="submit" class="form-btn">Sign Up</button>
+                        </div>
+                    </div>
+                    
+                    {% if error %}
+                    <div class="error-message" style="display:block;">{{ error }}</div>
+                    {% endif %}
+                    
+                    <p class="text-center text-sm text-gray-600 mt-2">
+                        Already have an account?
+                        <a href="{{ url_for('login') }}" class="form-link">Log in here</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Image / Illustration -->
+        <div class="signup-img-side">
+            <img src="{{ url_for('static', filename='images/elderly_welcome_banner.jpg') }}" alt="Welcome Banner">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle functionality
+    window.togglePassword = function(id) {
+        const input = document.getElementById(id);
+        const icon = event.target;
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    };
+
+    // Form section navigation
+    window.nextSection = function(currentId, nextId) {
+        // Remove validation for debugging, or uncomment to enable validation
+        // if (!validateSection(currentId)) return;
+        document.getElementById(currentId).style.display = 'none';
+        document.getElementById(nextId).style.display = 'block';
+        updateProgressBar(nextId);
+    };
+
+    window.prevSection = function(currentId, prevId) {
+        document.getElementById(currentId).style.display = 'none';
+        document.getElementById(prevId).style.display = 'block';
+        updateProgressBar(prevId);
+    };
+
+    function updateProgressBar(sectionId) {
+        const progress = document.getElementById('form-progress');
+        switch(sectionId) {
+            case 'account-section':
+                progress.style.width = '0%';
+                break;
+            case 'health-section':
+                progress.style.width = '50%';
+                break;
+            case 'emergency-section':
+                progress.style.width = '100%';
+                break;
+        }
+    }
+
+    function validateSection(sectionId) {
+        let isValid = true;
+        const section = document.getElementById(sectionId);
+        const inputs = section.querySelectorAll('input[required], select[required]');
+        inputs.forEach(input => {
+            const errorId = input.id + '-error';
+            const errorElement = document.getElementById(errorId);
+            if (!input.checkValidity()) {
+                input.classList.add('border-red-400');
+                errorElement.textContent = getErrorMessage(input);
+                errorElement.style.display = 'block';
+                isValid = false;
+            } else {
+                input.classList.remove('border-red-400');
+                errorElement.style.display = 'none';
+            }
+        });
+        // Special validation for password match
+        if (sectionId === 'account-section') {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            if (password !== confirmPassword) {
+                document.getElementById('confirm-password-error').textContent = 'Passwords do not match';
+                document.getElementById('confirm-password-error').style.display = 'block';
+                document.getElementById('confirm_password').classList.add('border-red-400');
+                isValid = false;
+            }
+        }
+        return isValid;
+    }
+
+    function getErrorMessage(input) {
+        if (input.validity.valueMissing) {
+            return 'This field is required';
+        }
+        if (input.validity.patternMismatch) {
+            if (input.id.includes('emergency')) {
+                return 'Please use format: +1234567890';
+            }
+            return 'Invalid format';
+        }
+        if (input.validity.tooShort) {
+            return `Minimum length is ${input.minLength} characters`;
+        }
+        if (input.validity.rangeUnderflow || input.validity.rangeOverflow) {
+            return `Age must be between 60 and 120`;
+        }
+        return 'Invalid value';
+    }
+
+    document.getElementById('auth-form').addEventListener('submit', function(e) {
+        if (!validateSection('account-section') || 
+            !validateSection('health-section') || 
+            !validateSection('emergency-section')) {
+            e.preventDefault();
+            if (!validateSection('account-section')) {
+                document.getElementById('health-section').style.display = 'none';
+                document.getElementById('emergency-section').style.display = 'none';
+                document.getElementById('account-section').style.display = 'block';
+                updateProgressBar('account-section');
+            } else if (!validateSection('health-section')) {
+                document.getElementById('emergency-section').style.display = 'none';
+                document.getElementById('health-section').style.display = 'block';
+                updateProgressBar('health-section');
+            }
+            showError('Please fix the errors in the form');
+        }
+    });
+
+    function showError(msg) {
+        let err = document.querySelector('.error-message');
+        if (!err) {
+            err = document.createElement('div');
+            err.className = 'error-message';
+            document.getElementById('auth-form').prepend(err);
+        }
+        err.textContent = msg;
+        err.style.display = 'block';
+        setTimeout(() => { err.style.display = 'none'; }, 5000);
+    }
+
+    document.querySelectorAll('#auth-form input, #auth-form select').forEach(el => {
+        el.addEventListener('blur', function() {
+            const errorId = this.id + '-error';
+            const errorElement = document.getElementById(errorId);
+            if (!this.checkValidity()) {
+                this.classList.add('border-red-400');
+                if (errorElement) {
+                    errorElement.textContent = getErrorMessage(this);
+                    errorElement.style.display = 'block';
+                }
+            } else {
+                this.classList.remove('border-red-400');
+                if (errorElement) errorElement.style.display = 'none';
+            }
+        });
+    });
+
+    // Medication suggestions (mock implementation)
+    const medicationSuggestions = [
+        "blood thinner", "sleep aid", "blood pressure medication", 
+        "cholesterol medication", "diabetes medication", "pain reliever"
+    ];
+
+    document.getElementById('medications').addEventListener('input', function() {
+        const input = this.value.toLowerCase();
+        const suggestions = document.getElementById('medication-suggestions');
+        if (input.length < 2) {
+            suggestions.classList.add('hidden');
+            return;
+        }
+        const matches = medicationSuggestions.filter(med => 
+            med.toLowerCase().includes(input)
+        );
+        if (matches.length > 0) {
+            suggestions.innerHTML = matches.map(med => 
+                `<div class="suggestion-item p-2 hover:bg-blue-50 cursor-pointer" onclick="selectMedication('${med}')">${med}</div>`
+            ).join('');
+            suggestions.classList.remove('hidden');
+        } else {
+            suggestions.classList.add('hidden');
+        }
+    });
+
+    window.selectMedication = function(med) {
+        const input = document.getElementById('medications');
+        const currentValue = input.value.trim();
+        if (currentValue === '') {
+            input.value = med;
+        } else {
+            const medications = currentValue.split(',').map(m => m.trim());
+            if (!medications.includes(med)) {
+                input.value = currentValue + ', ' + med;
+            }
+        }
+        document.getElementById('medication-suggestions').classList.add('hidden');
+        input.focus();
+    };
+});
+</script>
+{% endblock %}

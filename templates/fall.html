@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Fall events — HayatCare{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6"><h1 class="text-3xl font-bold">Phone fall events</h1>
+<p>{{ fall.label }}</p><a class="text-blue-700 underline" href="{{ url_for('phone.monitor') }}">Open phone monitoring</a>
+<p>Review possible falls recorded by your phone. “Queued” means your message was accepted for sending; it does not confirm that your caregiver received it. If a message stays on “Sending,” contact your caregiver directly when you need help.</p>
+{% if fall.events %}<div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th>Time</th><th>Event status</th><th>Caregiver message</th></tr></thead><tbody>
+{% for event in fall.events %}<tr class="border-t"><td class="py-3"><time data-timestamp="{{ event.created }}"></time></td><td>{{ event.status }}</td><td>{{ event.delivery }}{% if event.delivery_detail and event.delivery != 'queued' %} — {{ event.delivery_detail }}{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}<p>No recorded fall events.</p>{% endif %}
+</div>
+<script>document.querySelectorAll('time[data-timestamp]').forEach(el => {el.textContent = new Date(Number(el.dataset.timestamp)*1000).toLocaleString();});</script>
+{% endblock %}

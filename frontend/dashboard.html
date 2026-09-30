@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 min-h-screen font-sans">
+  <nav class="bg-white shadow p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold">Eldora Dashboard</h1>
+    <div class="space-x-4">
+      <a href="/menu" class="text-blue-600 hover:underline">Home</a>
+      <a href="/profile" class="text-blue-600 hover:underline">Profile</a>
+      <a href="/reminders" class="text-blue-600 hover:underline">Reminders</a>
+      <a href="/logout" class="text-red-500 hover:underline">Logout</a>
+    </div>
+  </nav>
+
+  <main class="p-6">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Welcome, {{ profile.name }}</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white shadow rounded-lg p-4">
+        <h3 class="text-sm text-gray-500">Heart Rate</h3>
+        <p class="text-2xl font-bold text-red-500">{{ vitals.heart_rate }} bpm</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4">
+        <h3 class="text-sm text-gray-500">Blood Pressure</h3>
+        <p class="text-2xl font-bold text-blue-600">{{ vitals.systolic_bp }}/{{ vitals.diastolic_bp }} mmHg</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4">
+        <h3 class="text-sm text-gray-500">Glucose</h3>
+        <p class="text-2xl font-bold text-green-600">{{ vitals.glucose }} mg/dL</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4">
+        <h3 class="text-sm text-gray-500">Oxygen</h3>
+        <p class="text-2xl font-bold text-indigo-600">{{ vitals.oxygen }}%</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4">
+        <h3 class="text-sm text-gray-500">Temperature</h3>
+        <p class="text-2xl font-bold text-yellow-500">{{ vitals.temperature }} °C</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4">
+        <h3 class="text-sm text-gray-500">Fall Status</h3>
+        <p class="text-xl font-semibold text-purple-600">{{ fall_label }}</p>
+        <p class="text-sm text-gray-500">{{ fall_expl }}</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4">
+        <h3 class="text-sm text-gray-500">Health Risk</h3>
+        <p class="text-xl font-semibold text-red-600">{{ health_risk }}</p>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4">
+        <h3 class="text-sm text-gray-500">CHD Risk</h3>
+        <p class="text-xl font-semibold">{{ chd_risk.risk_category }}</p>
+        <p class="text-sm text-gray-500">Probability: {{ chd_risk.probability }}</p>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-semibold mb-4">Vitals Over Time (Mock Data)</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm text-left text-gray-600">
+          <thead class="bg-gray-100 text-xs uppercase">
+            <tr>
+              <th class="px-4 py-2">Hour</th>
+              <th class="px-4 py-2">Heart Rate</th>
+              <th class="px-4 py-2">BP</th>
+              <th class="px-4 py-2">Glucose</th>
+              <th class="px-4 py-2">Oxygen</th>
+              <th class="px-4 py-2">Temperature</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in df %}
+            <tr class="border-t">
+              <td class="px-4 py-2">{{ row.hour }}</td>
+              <td class="px-4 py-2">{{ row.heart_rate }}</td>
+              <td class="px-4 py-2">{{ row.systolic_bp }}/{{ row.diastolic_bp }}</td>
+              <td class="px-4 py-2">{{ row.glucose }}</td>
+              <td class="px-4 py-2">{{ row.oxygen }}</td>
+              <td class="px-4 py-2">{{ row.temperature }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

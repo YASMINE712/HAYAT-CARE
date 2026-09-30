@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - HayatCare{% endblock %}
+{% block content %}
+<p class="p-4 mb-4 bg-amber-50 rounded">Demonstration: vital signs on this page are simulated, not measured. Phone fall monitoring uses real motion readings on its dedicated screen.</p>
+
+<main class="p-6 bg-gray-100 min-h-screen font-sans">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Welcome, {{ profile.name }}</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white shadow rounded-lg p-4">
+            <h3 class="text-sm text-gray-500">Heart Rate</h3>
+            <p class="text-2xl font-bold text-red-500">{{ vitals.heart_rate }} bpm</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+            <h3 class="text-sm text-gray-500">Blood Pressure</h3>
+            <p class="text-2xl font-bold text-blue-600">{{ vitals.systolic_bp }}/{{ vitals.diastolic_bp }} mmHg</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+            <h3 class="text-sm text-gray-500">Glucose</h3>
+            <p class="text-2xl font-bold text-green-600">{{ vitals.glucose }} mg/dL</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+            <h3 class="text-sm text-gray-500">Oxygen</h3>
+            <p class="text-2xl font-bold text-indigo-600">{{ vitals.oxygen }}%</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+            <h3 class="text-sm text-gray-500">Temperature</h3>
+            <p class="text-2xl font-bold text-yellow-500">{{ vitals.temperature }} °C</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+            <h3 class="text-sm text-gray-500">Fall Status</h3>
+            <p class="text-xl font-semibold text-purple-600">{{ fall_label }}</p>
+            <p class="text-sm text-gray-500">{{ fall_expl }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+            <h3 class="text-sm text-gray-500">Health Risk</h3>
+            <p class="text-xl font-semibold text-red-600">{{ health_risk }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+            <h3 class="text-sm text-gray-500">CHD Risk</h3>
+            <p class="text-xl font-semibold">{{ chd_risk.risk_category }}</p>
+            <p class="text-sm text-gray-500">Probability: {{ chd_risk.probability if chd_risk.probability is not none else 'Unavailable — measured inputs required' }}</p>
+        </div>
+    </div>
+
+    <div class="mt-8 bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">Vitals Over Time </h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left text-gray-600">
+                <thead class="bg-gray-100 text-xs uppercase">
+                    <tr>
+                        <th class="px-4 py-2">Hour</th>
+                        <th class="px-4 py-2">Heart Rate <i class="fas fa-chart-line graph-icon" onclick="toggleGraph('heartRateGraph')"></i></th>
+                        <th class="px-4 py-2">BP <i class="fas fa-chart-line graph-icon" onclick="toggleGraph('bpGraph')"></i></th>
+                        <th class="px-4 py-2">Glucose <i class="fas fa-chart-line graph-icon" onclick="toggleGraph('glucoseGraph')"></i></th>
+                        <th class="px-4 py-2">Oxygen <i class="fas fa-chart-line graph-icon" onclick="toggleGraph('oxygenGraph')"></i></th>
+                        <th class="px-4 py-2">Temperature <i class="fas fa-chart-line graph-icon" onclick="toggleGraph('tempGraph')"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in df %}
+                    <tr class="border-t">
+                        <td class="px-4 py-2">{{ row.hour }}</td>
+                        <td class="px-4 py-2">{{ row.heart_rate }}</td>
+                        <td class="px-4 py-2">{{ row.systolic_bp }}/{{ row.diastolic_bp }}</td>
+                        <td class="px-4 py-2">{{ row.glucose }}</td>
+                        <td class="px-4 py-2">{{ row.oxygen }}</td>
+                        <td class="px-4 py-2">{{ row.temperature }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Graph containers -->
+            <div id="heartRateGraph" class="graph-container">
+                <canvas id="heartRateChart"></canvas>
+            </div>
+            <div id="bpGraph" class="graph-container">
+                <canvas id="bpChart"></canvas>
+            </div>
+            <div id="glucoseGraph" class="graph-container">
+                <canvas id="glucoseChart"></canvas>
+            </div>
+            <div id="oxygenGraph" class="graph-container">
+                <canvas id="oxygenChart"></canvas>
+            </div>
+            <div id="tempGraph" class="graph-container">
+                <canvas id="tempChart"></canvas>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+.graph-container {
+    display: none;
+    width: 100%;
+    min-height: 300px;
+    margin-top: 1rem;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Function to toggle graph visibility
+    function toggleGraph(graphId) {
+        // Hide all graphs
+        document.querySelectorAll('.graph-container').forEach(g => g.style.display = 'none');
+        // Show the selected graph
+        const graph = document.getElementById(graphId);
+        graph.style.display = 'block';
+
+        // Initialize the chart if it's being shown for the first time
+        if (!graph.dataset.initialized) {
+            initializeChart(graphId);
+            graph.dataset.initialized = "true";
+        }
+    }
+
+    // Function to initialize charts
+    function initializeChart(graphId) {
+        // Extract data from the table
+        const table = document.querySelector('table');
+        const rows = table.querySelectorAll('tbody tr');
+        
+        const hours = [];
+        const heartRateData = [];
+        const systolicData = [];
+        const diastolicData = [];
+        const glucoseData = [];
+        const oxygenData = [];
+        const tempData = [];
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            hours.push(cells[0].textContent);
+            heartRateData.push(parseInt(cells[1].textContent));
+            
+            const bpParts = cells[2].textContent.split('/');
+            systolicData.push(parseInt(bpParts[0]));
+            diastolicData.push(parseInt(bpParts[1]));
+            
+            glucoseData.push(parseInt(cells[3].textContent));
+            oxygenData.push(parseInt(cells[4].textContent));
+            tempData.push(parseFloat(cells[5].textContent));
+        });
+        
+        let ctx, chart;
+        
+        switch(graphId) {
+            case 'heartRateGraph':
+                ctx = document.getElementById('heartRateChart').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [{
+                            label: 'Heart Rate (bpm)',
+                            data: heartRateData,
+                            borderColor: 'rgb(239, 68, 68)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+                break;
+                
+            case 'bpGraph':
+                ctx = document.getElementById('bpChart').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [
+                            {
+                                label: 'Systolic BP',
+                                data: systolicData,
+                                borderColor: 'rgb(59, 130, 246)',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.1,
+                                fill: true
+                            },
+                            {
+                                label: 'Diastolic BP',
+                                data: diastolicData,
+                                borderColor: 'rgb(99, 102, 241)',
+                                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                tension: 0.1,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+                break;
+                
+            case 'glucoseGraph':
+                ctx = document.getElementById('glucoseChart').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [{
+                            label: 'Glucose (mg/dL)',
+                            data: glucoseData,
+                            borderColor: 'rgb(16, 185, 129)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+                break;
+                
+            case 'oxygenGraph':
+                ctx = document.getElementById('oxygenChart').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [{
+                            label: 'Oxygen Saturation (%)',
+                            data: oxygenData,
+                            borderColor: 'rgb(99, 102, 241)',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                min: 90,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+                break;
+                
+            case 'tempGraph':
+                ctx = document.getElementById('tempChart').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [{
+                            label: 'Temperature (°C)',
+                            data: tempData,
+                            borderColor: 'rgb(234, 179, 8)',
+                            backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+                break;
+        }
+    }
+</script>
+{% endblock %}

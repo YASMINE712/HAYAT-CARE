@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static',filename='care.css') }}">{% endblock %}
+{% block content %}<div class="care"><nav class="care-links"><a href="/menu">Home</a><a href="/brain-training">Brain activities</a><a href="/brain-progress">My progress</a><a href="/medications">Medication program</a><a href="/reminders">Other reminders</a><button onclick="document.querySelector('.care').classList.toggle('large')">Larger text</button></nav>{% block care_content %}{% endblock %}</div>{% endblock %}
