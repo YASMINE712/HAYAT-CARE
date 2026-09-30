@@ -5,6 +5,10 @@
 HayatCare brings cognitive activities, medication routines, phone motion monitoring,
 and a conversational assistant into one accessible web application.
 
+![HayatCare daily care dashboard](docs/screenshots/daily-care.png)
+
+[View the page gallery and test results](docs/SCREENSHOTS.md).
+
 ## What you can do
 
 - **Train your mind:** seven memory, attention, and reasoning games with five difficulty levels, hints, and adaptive level suggestions.
