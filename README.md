@@ -31,6 +31,10 @@ and a conversational assistant into one accessible web application.
 Built with **Python, Flask, SQLite, scikit-learn, NumPy, pandas, JavaScript**, and optional **Ultralytics YOLO**.
 The app supports everyday care and activity tracking; its insights are not medical diagnoses.
 
+![YOLOv8n detection inside HayatCare](docs/screenshots/yolo-detection.png)
+
+Actual detection on a project demo image. See [ML results and test evidence](docs/SCREENSHOTS.md#yolo-deep-learning-detection) for predictions and a cardiovascular-model example.
+
 ## Run locally
 
 ```powershell

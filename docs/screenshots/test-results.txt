@@ -46,8 +46,9 @@ test_missing_or_insufficient_readings_are_unknown (test_hayatcare.LegacyModelTes
 test_import_hashes_legacy_password_and_preserves_extra_fields (test_hayatcare.MigrationTests.test_import_hashes_legacy_password_and_preserves_extra_fields) ... ok
 test_configured_template_uses_content_variables (test_hayatcare.NotificationTests.test_configured_template_uses_content_variables) ... ok
 test_provider_rejection_and_missing_configuration (test_hayatcare.NotificationTests.test_provider_rejection_and_missing_configuration) ... ok
+test_actual_upload_detection_and_private_image_access (test_vision.VisionIntegrationTests.test_actual_upload_detection_and_private_image_access) ... ok
 
 ----------------------------------------------------------------------
-Ran 48 tests in 18.709s
+Ran 49 tests in 20.598s
 
 OK

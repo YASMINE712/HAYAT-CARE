@@ -1,0 +1,18 @@
+{
+  "description": "Actual YOLOv8n inference through the application upload flow",
+  "source": "static/images/hero.jpg (existing project demonstration image)",
+  "model": "yolov8n.pt",
+  "threshold": 0.5,
+  "detections": [
+    {
+      "box": [
+        155,
+        0,
+        561,
+        287
+      ],
+      "confidence": 0.715,
+      "name": "person"
+    }
+  ]
+}

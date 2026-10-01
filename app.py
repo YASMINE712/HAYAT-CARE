@@ -405,7 +405,8 @@ def create_app(config=None):
             detections, annotated = detect_objects_yolo_with_boxes(str(path), filename)
         except Exception:
             path.unlink(missing_ok=True)
-            return jsonify(error='Object detection unavailable. Install requirements-vision.txt and verify yolov8n.pt.'), 503
+            app.logger.exception('Room image analysis failed')
+            return jsonify(error='Image analysis is unavailable right now. Please try again later.'), 503
         profile = patient()
         house = profile.get('house', {})
         house[room] = [d['name'] for d in detections]

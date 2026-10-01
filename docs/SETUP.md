@@ -83,6 +83,27 @@ Browser API references:
 
 ## External services
 
+### Optional YOLO image detection on CPU
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
+.\.venv\Scripts\python.exe -m pip install -r requirements-vision.txt
+```
+
+Place the YOLOv8n weights at `yolov8n.pt` in the project root. Weights stay local
+and are excluded from Git. Open **Home safety → Add Room**, select an image,
+and choose **Upload & Analyze**. The app displays detected objects with bounding
+boxes and confidence scores above 50%.
+
+The optional real-model integration test exercises upload, inference, annotation,
+and account-specific access to the resulting image:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_vision.py -v
+```
+
+The test skips when the optional vision package or local weights are unavailable.
+
 Use `.env.example` as the settings reference. Do not overwrite an existing `.env`
 with empty example values.
 
@@ -201,8 +222,9 @@ model in this repository establishes a clinical diagnosis or treatment decision.
 ```
 
 Tests use temporary databases and fake messaging senders, never real caregivers.
-The updated suite passes 48 automated tests. The earlier environment repair also
-passed `pip check`.
+The updated suite passes 49 automated tests with the optional vision dependencies
+and weights installed, including real YOLO inference and image access isolation.
+`pip check` also passes.
 Coverage includes sensor gaps and invalid data, detector state across requests,
 cancellation/timeout, duplicate worker claims, account isolation, password
 migration, CSRF, timezone-aware recurring reminders, assessment saving, model

@@ -601,28 +601,22 @@
         `;
     }
 
-    // Overlay bounding boxes for YOLO annotations
+    // The annotated image already contains boxes; avoid a second unscaled overlay.
     function updateAnnotatedImage(imageUrl, detections) {
-    const container = document.getElementById('annotated-image-container');
-    container.innerHTML = `
-        <div style="position: relative; display: inline-block;">
-            <img id="annotated-img" src="${imageUrl}" alt="Annotated room image" style="width: 100%; height: auto; display: block;">
-            ${detections && detections.length ? detections.map(det => {
-                const [x1, y1, x2, y2] = det.box;
-                return `
-                    <div class="annotation" style="
-                        left: ${x1}px;
-                        top: ${y1}px;
-                        width: ${x2 - x1}px;
-                        height: ${y2 - y1}px;
-                    ">
-                        <div class="annotation-label">${escapeHTML(det.name)}</div>
-                    </div>
-                `;
-            }).join('') : ''}
-        </div>
-    `;
-}
+        const container = document.getElementById('annotated-image-container');
+        container.replaceChildren();
+        const image = document.createElement('img');
+        image.id = 'annotated-img'; image.src = imageUrl;
+        image.alt = 'Your uploaded image with detected objects outlined';
+        image.style.cssText = 'width:100%;height:auto;display:block;border-radius:12px';
+        container.append(image);
+        const summary = document.createElement('p');
+        summary.style.cssText = 'padding:16px;background:#eee8fa;border-radius:12px;margin-top:15px';
+        summary.textContent = detections.length ? detections.map(d => d.name +
+            (typeof d.confidence === 'number' ? ' · '+Math.round(d.confidence*100)+'% confidence' : '')).join(' | ') :
+            'No objects were recognized with enough confidence. Try a clearer photo.';
+        container.append(summary);
+    }
 
     function displayRecommendations(text) {
         const recommendationsEl = document.getElementById('recommendations');

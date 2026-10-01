@@ -31,7 +31,7 @@ def detect_objects_yolo_with_boxes(image_path, original_filename):
             continue
         label = model.names[int(box.cls[0])]
         coordinates = list(map(int, box.xyxy[0].tolist()))
-        detections.append({'name': label, 'box': coordinates})
+        detections.append({'name': label, 'box': coordinates, 'confidence': round(confidence,4)})
         x1, y1, x2, y2 = coordinates
         cv2.rectangle(image, (x1, y1), (x2, y2), (255, 165, 0), 2)
         cv2.putText(image, f'{label} {confidence:.2f}', (x1, max(20, y1-10)), cv2.FONT_HERSHEY_SIMPLEX, .6, (255,255,255), 2)
